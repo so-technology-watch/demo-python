@@ -1,5 +1,18 @@
 import json
 
+
+def json_response(car, response):
+    if car is None:
+        return {"errorCode": 404, "message": response}
+    return json.dumps(car.to_dict())
+
+
+def json_bool_response(result):
+    if result:
+        return {"errorCode": 200, "message": "Success"}
+    return {"errorCode": 404, "message": "Entity not found"}
+
+
 def jdefault(o):
     """
     Define how deserialize an entity
@@ -24,6 +37,7 @@ def error_handler(code, message, response):
         'code': code,
         'message': message
     })
+
 
 def get_record_from_body(request, record_type):
     """

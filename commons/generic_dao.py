@@ -1,187 +1,85 @@
-import sqlite3 as lite
+from sqlalchemy.exc import SQLAlchemyError
+from commons.get_connexion import DataProvider as dataProvider
+from sqlalchemy import *
+from sqlalchemy.orm import *
 
 
 class GenericDao(object):
-    def __init__(self, entity_type):
-        self._entity_type = entity_type
-        self._entity = entity_type.__name__.lower()
+    def __init__(self, table_name, entity_type):
+        self.table_name = table_name
+        self.entity_type = entity_type
+        self.dataProvider = dataProvider()
+        self.table = Table(table_name, self.dataProvider.metadata, autoload=True)
+        self.table_mapper = mapper(entity_type, self.table)
 
-    def do_select_all(self, query):
-        """
-        Loads all the occurrences existing in the database
-        :param query:
-        :return: all the occurrences existing in the database
-        """
-        conn, cur = None, None
-        req, list_entities = query, []
+    def get_connexion(self):
+        return self.dataProvider.session
+
+    def close_connexion(self, session):
+        if session is not None:
+            try:
+                session.close()
+            except SQLAlchemyError as e:
+                raise (e)
+
+    def do_select_all(self):
         try:
-            conn, cur = get_connection()
-            cur.execute(req)
-            list_entities = [self._entity_type(*row) for row in cur.fetchall()]
-        except lite.Error as e:
-            print(e)
-        finally:
-            close_connection(conn)
-        return list_entities
+            session = self.get_connexion()
+        except SQLAlchemyError as e:
+            raise (e)
+        return session.query(self.entity_type).all()
 
-    def do_select(self, req, params):
-        """
-        Loads the given bean from the database using its primary key
-        :param req:
-        :param params:
-        :return: loaded entity
-        """
-        entity_selected, conn, cur = None, None, None
+    def do_select(self, query):
         try:
-            conn, cur = get_connection()
-            cur.execute(req, params)
-            row_selected = cur.fetchone()
-            if row_selected.__len__() > 0:
-              entity_selected = self._entity_type(*row_selected)
-        except lite.Error as e:
-            print(e)
-        finally:
-            close_connection(conn)
-        return entity_selected
+            session = self.get_connexion()
+            entity = session.query(self.entity_type).filter(query).first()
+        except SQLAlchemyError as e:
+            raise (e)
+        return entity
 
-
-def do_delete(req, params):
-    """
-    Deletes the given entity in the database (SQL DELETE)
-    :param req:
-    :param params:
-    :return: return code (i.e. the row count affected by the DELETE operation : 0 or 1 )
-    """
-    row_deleted, conn, cur = 0, None, None
-    try:
-        conn, cur = get_connection()
-        cur.execute(req, params)
-        conn.commit()
-        row_deleted = conn.total_changes
-    except lite.Error as e:
-        print(e)
-        conn.rollback()
-    finally:
-        close_connection(conn)
-    return row_deleted
-
-
-def do_insert_incr(req, params):
-    """
-    Inserts the given entity in the database (SQL INSERT) with an auto-incremented columns
-    :param req:
-    :param params:
-    :return: _id of insered entity
-    """
-    entity_id, conn, cur = -1, None, None
-    try:
-        conn, cur = get_connection()
-        cur.execute(req, params)
-        conn.commit()
-        entity_id = cur.lastrowid
-    except lite.Error as e:
-        print(e)
-        conn.rollback()
-    finally:
-        close_connection(conn)
-    return entity_id
-
-
-def do_insert(req, params):
-    """
-    Inserts the given bean in the database
-    :param req:
-    :param params:
-    :return:
-    """
-    conn, cur = None, None
-    try:
-        conn, cur = get_connection()
-        cur.execute(req, params)
-        conn.commit()
-    except lite.Error as e:
-        print(e)
-        conn.rollback()
-    finally:
-        close_connection(conn)
-
-
-def do_exists(req, params):
-    """
-    Checks if the given bean exists in the database
-    :param req:
-    :param params:
-    :return: true if the given entity exist
-    """
-    conn, cur, is_exist = False, None, None
-    try:
-        conn, cur = get_connection()
-        cur.execute(req, params)
-        is_exist = cur.fetchall().__len__() > 0
-    except lite.Error as e:
-        print(e)
-    finally:
-        close_connection(conn)
-    return is_exist
-
-
-def do_count_all(req):
-    """
-    Counts all the occurrences in the table
-    :param req:
-     :return: number of occurence in the table
-     """
-    conn, cur, entity_number = None, None, 0
-    try:
-        conn, cur = get_connection()
-        cur.execute(req)
-        entity_number = cur.fetchall().__len__()
-    except lite.Error as e:
-        print(e)
-    finally:
-        close_connection(conn)
-    return entity_number
-
-
-def do_update(req, params):
-    """
-    Updates the given entity in the database (SQL UPDATE)
-    :param req:
-    :param params:
-    :return: return code (i.e. the row count affected by the UPDATE operation : 0 or 1 )
-    """
-    row_updated, conn, cur = 0, None, None
-    try:
-        conn, cur = get_connection()
-        cur.execute(req, params)
-        conn.commit()
-        row_updated = conn.total_changes
-    except lite.Error as e:
-        print(e)
-        conn.rollback()
-    finally:
-        close_connection(conn)
-    return row_updated
-
-
-def get_connection():
-    """
-    Get a database connection
-    :return: database object connection
-    """
-    try:
-        conn = lite.connect("./sqlite_db.sqlite")
-        cur = conn.cursor()
-        return conn, cur
-    except lite.Error as e:
-        print(e)
-    return None, None
-
-
-def close_connection(conn):
-    """ Commit changes and close connection to the database """
-    if conn:
+    def do_insert(self, entity):
+        session = None
         try:
-            conn.close()
-        except lite.Error as e:
-            print(e)
+            session = self.get_connexion()
+            session.add(entity)
+            session.commit()
+            return entity
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise (e)
+
+    def do_update(self, entity, query):
+        try:
+            session = self.get_connexion()
+            result = session.query(self.entity_type).filter(query).update(entity.to_dict())
+            session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise (e)
+        return result
+
+    def do_exist(self, query):
+        try:
+            session = self.get_connexion()
+            result = session.query(self.entity_type).filter(query).exists()
+        except SQLAlchemyError as e:
+            raise (e)
+        return result
+
+    def do_count_all(self):
+        try:
+            session = self.get_connexion()
+            result = session.query(self.entity_type).count()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise (e)
+        return result
+
+    def do_delete(self, query):
+        try:
+            session = self.get_connexion()
+            result = session.query(self.entity_type).filter(query).delete()
+            session.commit()
+        except SQLAlchemyError as e:
+            raise (e)
+        return result
