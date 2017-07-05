@@ -4,7 +4,7 @@
 Bottle is a fast and simple micro-framework for small web applications. It
 offers request dispatching (Routes) with URL parameter support, templates,
 a built-in HTTP Server and adapters for many third party WSGI/HTTP-server and
-template engines - all in a single file and with no dependencies other than the
+templates engines - all in a single file and with no dependencies other than the
 Python Standard Library.
 
 Homepage and documentation: http://bottlepy.org/
@@ -2023,17 +2023,17 @@ class JSONPlugin(object):
 
 class TemplatePlugin(object):
     """ This plugin applies the :func:`view` decorator to all routes with a
-        `template` config parameter. If the parameter is a tuple, the second
+        `templates` config parameter. If the parameter is a tuple, the second
         element must be a dict with additional options (e.g. `template_engine`)
-        or default variables for the template. """
-    name = 'template'
+        or default variables for the templates. """
+    name = 'templates'
     api = 2
 
     def setup(self, app):
         app.tpl = self
 
     def apply(self, callback, route):
-        conf = route.config.get('template')
+        conf = route.config.get('templates')
         if isinstance(conf, (tuple, list)) and len(conf) == 2:
             return view(conf[0], **conf[1])(callback)
         elif isinstance(conf, str):
@@ -3798,7 +3798,7 @@ class TemplateError(BottleException):
 
 
 class BaseTemplate(object):
-    """ Base class and minimal API for template adapters """
+    """ Base class and minimal API for templates adapters """
     extensions = ['tpl', 'html', 'thtml', 'stpl']
     settings = {}  # used in prepare()
     defaults = {}  # used in render()
@@ -3808,9 +3808,9 @@ class BaseTemplate(object):
                  name=None,
                  lookup=None,
                  encoding='utf8', **settings):
-        """ Create a new template.
+        """ Create a new templates.
         If the source parameter (str or buffer) is missing, the name argument
-        is used to guess a template filename. Subclasses can assume that
+        is used to guess a templates filename. Subclasses can assume that
         self.source and/or self.filename are set. Both are strings.
         The lookup, encoding and settings parameters are stored as instance
         variables.
@@ -3830,7 +3830,7 @@ class BaseTemplate(object):
             if not self.filename:
                 raise TemplateError('Template %s not found.' % repr(name))
         if not self.source and not self.filename:
-            raise TemplateError('No template specified.')
+            raise TemplateError('No templates specified.')
         self.prepare(**self.settings)
 
     @classmethod
@@ -3838,10 +3838,10 @@ class BaseTemplate(object):
         """ Search name in all directories specified in lookup.
         First without, then with common extensions. Return first hit. """
         if not lookup:
-            raise depr(0, 12, "Empty template lookup path.", "Configure a template lookup path.")
+            raise depr(0, 12, "Empty templates lookup path.", "Configure a templates lookup path.")
 
         if os.path.isabs(name):
-            raise depr(0, 12, "Use of absolute path for template name.",
+            raise depr(0, 12, "Use of absolute path for templates name.",
                        "Refer to templates with names or paths relative to the lookup path.")
 
         for spath in lookup:
@@ -3864,13 +3864,13 @@ class BaseTemplate(object):
 
     def prepare(self, **options):
         """ Run preparations (parsing, caching, ...).
-        It should be possible to call this again to refresh a template or to
+        It should be possible to call this again to refresh a templates or to
         update settings.
         """
         raise NotImplementedError
 
     def render(self, *args, **kwargs):
-        """ Render the template with the specified local variables and return
+        """ Render the templates with the specified local variables and return
         a single byte or unicode string. If it is a byte string, the encoding
         must match self.encoding. This method must be thread-safe!
         Local variables may be provided in dictionaries (args)
@@ -3977,7 +3977,7 @@ class SimpleTemplate(BaseTemplate):
         try:
             source, encoding = touni(source), 'utf8'
         except UnicodeError:
-            raise depr(0, 11, 'Unsupported template encodings.', 'Use utf-8 for templates.')
+            raise depr(0, 11, 'Unsupported templates encodings.', 'Use utf-8 for templates.')
         parser = StplParser(source, encoding=encoding, syntax=self.syntax)
         code = parser.translate()
         self.encoding = parser.encoding
@@ -4017,7 +4017,7 @@ class SimpleTemplate(BaseTemplate):
         return env
 
     def render(self, *args, **kwargs):
-        """ Render the template using keyword arguments as local variables. """
+        """ Render the templates using keyword arguments as local variables. """
         env = {}
         stdout = []
         for dictarg in args:
@@ -4068,14 +4068,14 @@ class StplParser(object):
         # 7: Our special 'end' keyword (but only if it stands alone)
         |((?:^|;)[\ \t]*end[\ \t]*(?=(?:%(block_close)s[\ \t]*)?\r?$|;|\#))
 
-        # 8: A customizable end-of-code-block template token (only end of line)
+        # 8: A customizable end-of-code-block templates token (only end of line)
         |(%(block_close)s[\ \t]*(?=\r?$))
 
         # 9: And finally, a single newline. The 10th token is 'everything else'
         |(\r?\n)
     '''
 
-    # Match the start tokens of code areas in a template
+    # Match the start tokens of code areas in a templates
     _re_split = r'''(?m)^[ \t]*(\\?)((%(line_start)s)|(%(block_start)s))'''
     # Match inline statements (may contain python strings)
     _re_inl = r'''%%(inline_start)s((?:%s|[^'"\n]+?)*?)%%(inline_end)s''' % _re_inl
@@ -4169,7 +4169,7 @@ class StplParser(object):
                 code_line, self.indent_mod = _blk2, -1
             elif _end:  # The non-standard 'end'-keyword (ends a block)
                 self.indent -= 1
-            elif _cend:  # The end-code-block template token (usually '%>')
+            elif _cend:  # The end-code-block templates token (usually '%>')
                 if multiline:
                     multiline = False
                 else:
@@ -4219,8 +4219,8 @@ class StplParser(object):
 
 def template(*args, **kwargs):
     """
-    Get a rendered template as a string iterator.
-    You can use a name, a filename or a template string as first parameter.
+    Get a rendered templates as a string iterator.
+    You can use a name, a filename or a templates string as first parameter.
     Template rendering arguments can be passed as dictionaries
     or directly (as keyword arguments).
     """
@@ -4251,12 +4251,12 @@ jinja2_template = functools.partial(template, template_adapter=Jinja2Template)
 
 
 def view(tpl_name, **defaults):
-    """ Decorator: renders a template for a handler.
+    """ Decorator: renders a templates for a handler.
         The handler can control its behavior like that:
 
-          - return a dict of template vars to fill out the template
+          - return a dict of templates vars to fill out the templates
           - return something other than a dict and the view decorator will not
-            process the template, but return the handler result as is.
+            process the templates, but return the handler result as is.
             This includes returning a HTTPResponse(dict) to get,
             for instance, JSON with autojson or other castfilters.
     """
@@ -4303,7 +4303,7 @@ HTTP_CODES[511] = "Network Authentication Required"
 _HTTP_STATUS_LINES = dict((k, '%d %s' % (k, v))
                           for (k, v) in HTTP_CODES.items())
 
-#: The default template used for error pages. Override with @error()
+#: The default templates used for error pages. Override with @error()
 ERROR_PAGE_TEMPLATE = """
 %%try:
     %%from %s import DEBUG, request
