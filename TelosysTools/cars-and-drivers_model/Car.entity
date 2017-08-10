@@ -1,0 +1,9 @@
+// Entity Car
+
+Car {
+  id : int { @Id, @AutoIncremented } ;
+  manufacturer_id : Manufacturer ;
+  model : string { @NotNull, @NotEmpty};
+  year : date { @NotNull, @NotEmpty};
+  color : string ;
+}

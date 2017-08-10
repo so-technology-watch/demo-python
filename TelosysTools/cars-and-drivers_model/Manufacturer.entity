@@ -1,0 +1,6 @@
+// Entity Manufacturer
+
+Manufacturer {
+  id : int { @Id, @AutoIncremented } ;
+  name : string { @NotNull, @NotEmpty } ;
+}

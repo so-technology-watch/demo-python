@@ -1,0 +1,48 @@
+${SHARP} Python class for entity ${entity.name} 
+${SHARP} Created on $today.date ( Time $today.time )
+
+#set( $table = $entity)
+from sqlalchemy import *
+from commons.get_connexion import Base
+
+
+class ${entity.name}(Base):
+    __tablename__ = '$entity.name'
+
+#if(! $entity.hasCompositePrimaryKey())
+#foreach( $field in $entity.attributes )
+#if($field.isKeyElement())
+    $field.name = Column($field.wrapperType, primary_key=True#if($field.isNotNull()), nullable=False#end, unique=True, autoincrement=True)
+#elseif($field.isFK())
+#set($entity = $field.referencedEntity)
+    $field.name = Column($field.wrapperType, ForeignKey('${field.referencedEntity}.${entity.keyAttributesNamesAsString('')}', ondelete="RESTRICT")#if($field.isNotNull()), nullable=False#end)
+#else
+    $field.name = Column($field.wrapperType#if($field.isNotNull()), nullable=False#end)
+#end
+#end
+#else
+#foreach( $field in $entity.attributes )
+#if($field.isKeyElement())
+#set($entity = $field.referencedEntity)
+    $field.name = Column($field.wrapperType, ForeignKey('${field.referencedEntity}.${entity.keyAttributesNamesAsString('')}', ondelete="RESTRICT"), primary_key=True#if($field.isNotNull()), nullable=False#end)
+#elseif($field.isFK())
+#set($entity = $field.referencedEntity)
+    $field.name = Column($field.wrapperType, ForeignKey('${field.referencedEntity}.${entity.keyAttributesNamesAsString('')}', ondelete="RESTRICT")#if($field.isNotNull()), nullable=False#end)
+#else
+    $field.name = Column($field.wrapperType#if($field.isNotNull()), nullable=False#end)
+#end
+#end
+#end
+
+#set($entity = $table)
+    def __init__(self#foreach( $field in $entity.attributes ), $field.name='null'#end):
+#foreach( $field in $entity.attributes )
+        self.$field.name = $field.name
+#end
+
+    def to_dict(self):
+        return {
+#foreach( $field in $entity.attributes )
+            "$field.name": self.$field.name,
+#end
+        }

@@ -1,0 +1,8 @@
+// Entity Person
+
+Person {
+  id : int { @Id, @AutoIncremented } ;
+  firstname : string { @NotNull, @NotEmpty };
+  lastname : string { @NotNull, @NotEmpty };
+  birthdate : date { @NotNull, @NotEmpty };
+}
