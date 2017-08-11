@@ -1,8 +1,0 @@
-// Entity Driver
-
-Driver {
-  person_id : Person { @Id } ;
-  car_id : Car { @Id } ;
-  licence_number : int { @NotNull, @NotEmpty } ;
-  licence_date : date { @NotNull, @NotEmpty } ; 
-}
