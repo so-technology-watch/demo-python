@@ -53,6 +53,34 @@ class TypementionService:
         query = sqlalchemy_query(request)
         return self.dao.do_delete(query)
 
+    def delete(self, entity):
+        """
+        Deletes an entity using its Id / Primary Key
+        :param _id:
+        :return: true if the entity has been deleted, false if not found and not deleted
+        """
+        request = build_query(entity.idMention)
+        query = sqlalchemy_query(request)
+        return self.dao.do_delete(query)
+
+    def exists_by_id(self, idMention):
+        """
+        Ckeck if an Id / Primary Key is in the entity table
+        :return: true or false
+        """
+        request = build_query(idMention)
+        query = sqlalchemy_query(request)
+        return self.dao.do_exists(query)
+
+    def exists(self, entity):
+        """
+        Ckeck if an entity is in the entity table
+        :return: true or false
+        """
+        request = build_query(entity.idMention)
+        query = sqlalchemy_query(request)
+        return self.dao.do_exists(query)
+
     def count_all(self):
         """
         Counts all the entity present in the entity table
@@ -63,7 +91,7 @@ class TypementionService:
 
 def build_query(idMention):
     return {
-        "id_1": 'Typemention.idMention == {}'.format(idMention),
+        "id_1": Typemention.idMention == '{}'.format(idMention),
     }
 
 
