@@ -91,3 +91,13 @@ class GenericDao(object):
         except SQLAlchemyError as e:
             print(e)
             return e
+
+    def do_exists(self, query):
+        try:
+            session = self.get_connexion()
+            q = session.query(self.entity_type).filter(query)
+            return session.query(q.exists()).scalar()
+        except SQLAlchemyError as e:
+            print(e)
+            return e
+
