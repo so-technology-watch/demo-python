@@ -22,7 +22,11 @@ class ${entity.name}Service:
         request = build_query($entity.keyAttributesNamesAsString(', '))
 #end
         query = sqlalchemy_query(request)
-        return self.dao.do_select(query)
+        exist = self.dao.do_exists(query)
+        if exist:
+            return self.dao.do_select(query)
+        else:
+            return False
 
     def find_all(self):
         """
@@ -43,7 +47,11 @@ class ${entity.name}Service:
         request = build_query($entity.keyAttributesNamesAsString(', ', 'entity.', ''))
 #end
         query = sqlalchemy_query(request)
-        return self.dao.do_insert(entity, query)
+        exist = self.dao.do_exists(query)
+        if exist:
+            return False
+        else:
+            return self.dao.do_insert(entity)
 
     def update(self, entity):
         """
@@ -57,7 +65,29 @@ class ${entity.name}Service:
         request = build_query($entity.keyAttributesNamesAsString(', ', 'entity.', ''))
 #end
         query = sqlalchemy_query(request)
-        return self.dao.do_update(entity, query)
+        exist = self.dao.do_exists(query)
+        if exist:
+            return self.dao.do_update(entity, query)
+        else:
+            return False
+
+    def save(self, entity):
+        """
+        Updates ou creates the given entity in the database
+        :param entity: to be updated or created (supposed to have a valid Id/PK )
+        :return: true if the entity has been updated, false if not found and not updated
+        """
+#if(! $entity.hasCompositePrimaryKey() )
+        request = build_query(entity.$entity.keyAttributesNamesAsString(''))
+#else
+        request = build_query($entity.keyAttributesNamesAsString(', ', 'entity.', ''))
+#end
+        query = sqlalchemy_query(request)
+        exist = self.dao.do_exists(query)
+        if exist:
+            return self.dao.do_update(entity, query)
+        else:
+            return self.dao.do_insert(entity)
 
 #if(! $entity.hasCompositePrimaryKey() )
     def delete_by_id(self, $entity.keyAttributesNamesAsString('')):
@@ -75,7 +105,55 @@ class ${entity.name}Service:
         request = build_query($entity.keyAttributesNamesAsString(', '))
 #end
         query = sqlalchemy_query(request)
+        exist = self.dao.do_exists(query)
+        if exist:
+            return self.dao.do_delete(query)
+        else:
+            return False
+
+    def delete(self, entity):
+        """
+        Deletes an entity using its Id / Primary Key
+        :param _id:
+        :return: true if the entity has been deleted, false if not found and not deleted
+        """
+#if(! $entity.hasCompositePrimaryKey() )
+        request = build_query(entity.$entity.keyAttributesNamesAsString(''))
+#else
+        request = build_query($entity.keyAttributesNamesAsString(', ', 'entity.', ''))
+#end
+        query = sqlalchemy_query(request)
         return self.dao.do_delete(query)
+
+#if(! $entity.hasCompositePrimaryKey() )
+    def exists_by_id(self, $entity.keyAttributesNamesAsString('')):
+#else
+    def exists_by_id(self, $entity.keyAttributesNamesAsString(', ')):
+#end
+        """
+        Ckeck if an Id / Primary Key is in the entity table
+        :return: true or false
+        """
+#if(! $entity.hasCompositePrimaryKey() )
+        request = build_query($entity.keyAttributesNamesAsString(''))
+#else
+        request = build_query($entity.keyAttributesNamesAsString(', '))
+#end
+        query = sqlalchemy_query(request)
+        return self.dao.do_exists(query)
+
+    def exists(self, entity):
+        """
+        Ckeck if an entity is in the entity table
+        :return: true or false
+        """
+#if(! $entity.hasCompositePrimaryKey() )
+        request = build_query(entity.$entity.keyAttributesNamesAsString(''))
+#else
+        request = build_query($entity.keyAttributesNamesAsString(', ', 'entity.', ''))
+#end
+        query = sqlalchemy_query(request)
+        return self.dao.do_exists(query)
 
     def count_all(self):
         """
@@ -94,7 +172,7 @@ def build_query($entity.keyAttributesNamesAsString(', ')):
     return {
 #foreach($field in $entity.keyAttributes)
 #set( $cpt = $cpt + 1)
-        "id_$cpt": '${entity.name}.$field.name == {}'.format($field.name),
+        "id_$cpt": ${entity.name}.$field.name == '{}'.format($field.name),
 #end
     }
 

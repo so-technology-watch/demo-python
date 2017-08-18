@@ -1,6 +1,7 @@
 from bottle import get, post, put, delete, request, route, response, hook
 from services import ${entity.name}_service as commons_entity_service
 from jsonSerializer.${entity.name}JsonSerializer import ${entity.name}JsonSerializer
+from entities.$entity.name import $entity.name
 import json
 
 ${entity.name.toLowerCase()}_service = commons_entity_service.${entity.name}Service("${entity.name}")
@@ -50,14 +51,15 @@ def get_by_id($entity.keyAttributesNamesAsString('')):
 #else
         result = ${entity.name.toLowerCase()}_service.find_by_id($entity.keyAttributesNamesAsString(', '))
 #end        
-        if result['code'] == 200:
-            if result['entity']:
+        if result:
+            if type(result) == $entity.name:
                 response.status = 200
-                return json_serializer.to_json(result['entity'])
+                return json_serializer.to_json(result)
             else:
-                response.status = 404
+                response.status = 500
+                return {"error": 500, "error_description": "{}".format(result)}
         else:
-            response.status = 400
+            response.status = 404
     except TypeError as e:
         print(e)
         response.status = 500
@@ -72,14 +74,15 @@ def create():
             body_str = body.read().decode('utf-8')
             entity = json_serializer.from_json(body_str)
             result = ${entity.name.toLowerCase()}_service.insert(entity)
-            if result['code'] == 201:
-                response.status = 201
-                return json_serializer.to_json(entity)
-            if result['code'] == 409:
-                response.status = 409
+            if result:
+                if type(result) == $entity.name:
+                    response.status = 201
+                    return json_serializer.to_json(result)
+                else:
+                    response.status = 500
+                    return {"error": 500, "error_description": "{}".format(result)}
             else:
-                response.status = 500
-                return {"error": 500, "error_description": "{}".format(result['message'])}
+                response.status = 409
         else:
             response.status = 400
     except TypeError as e:
@@ -97,33 +100,56 @@ def update($entity.keyAttributesNamesAsString('')):
 #end
     try:
         body = request.body
-        if body:
-            body_str = body.read().decode('utf-8')
-            entity = json_serializer.from_json(body_str)
+        body_str = body.read().decode('utf-8')
+        entity = json_serializer.from_json(body_str)
 #set( $condition = "" )
 #foreach($field in $entity.keyAttributes) 
 #set( $type_id = ${field.databaseType.toLowerCase()})
+#if( $type_id == 'integer' or $type_id == 'smallint' )
+#set( $type_id = 'int' )
+#elseif( $type_id == 'varchar' )
+#set( $type_id = 'str' )
+#end
 #if( $foreach.count < $entity.keyAttributes.size() )
 #set( $condition = $condition + "entity." + $field.name + " == ${type_id}($field.name)" + " and ")
 #else
 #set( $condition = $condition + "entity." + $field.name + " == ${type_id}($field.name)")
 #end
 #end
-            if ${condition}:
-                result = ${entity.name.toLowerCase()}_service.update(entity)
-                if result['code'] == 200:
+        if ${condition}:
+            result = ${entity.name.toLowerCase()}_service.update(entity)
+            if result:
+                if type(result) == int and result > 0:
                     response.status = 200
-                    return json_serializer.to_json(result['entity'])
-                if result['code'] == 201:
-                    response.status = 201
-                    return json_serializer.to_json(result['entity'])
                 else:
                     response.status = 500
-                    return {"error": 500, "error_description": "{}".format(result['message'])}
+                    return {"error": 500, "error_description": "{}".format(result)}
             else:
-                response.status = 400
+                response.status = 404
         else:
             response.status = 400
+    except TypeError as e:
+        print(e)
+        response.status = 500
+        return {"error": 500, "error_description": "{}".format(e)}
+
+
+@put('/api/v1/${entity.name.toLowerCase()}/')
+def save():
+    try:
+        body = request.body
+        body_str = body.read().decode('utf-8')
+        entity = json_serializer.from_json(body_str)
+        result = ${entity.name.toLowerCase()}_service.save(entity)
+        if type(result) == $entity.name:
+            response.status = 201
+            return json_serializer.to_json(result)
+        if type(result) == int and result > 0:
+            response.status = 200
+            return json_serializer.to_json(entity)
+        else:
+            response.status = 500
+            return {"error": 500, "error_description": "{}".format(result)}
     except TypeError as e:
         print(e)
         response.status = 500
@@ -143,17 +169,18 @@ def delete($entity.keyAttributesNamesAsString('')):
 #else
         result = ${entity.name.toLowerCase()}_service.delete_by_id($entity.keyAttributesNamesAsString(', '))
 #end
-        if result['code'] == 204:
-            if result['entity']:
+        if result:
+            if type(result) == int and result > 0:
                 response.status = 204
             else:
-                response.status = 404
+                response.status = 500
+                return {"errorCode": 500, "error_description": "{}".format(result)}
         else:
-            response.status = 400
+            response.status = 404
     except TypeError as e:
         print(e)
         response.status = 500
-        return {"errorCode": 500, "message": "Internal Server Error"}
+        return {"errorCode": 500, "error_description": "{}".format(e)}
 
 
 @get('/api/v1/${entity.name.toLowerCase()}.count')

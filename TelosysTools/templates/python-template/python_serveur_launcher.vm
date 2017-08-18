@@ -1,7 +1,8 @@
 from bottle import run
 import bottle
-#foreach( $field in $selectedEntities )
-import ressources.${field.name}_ressource
+
+#foreach( $entity in $selectedEntities )
+import ressources.${entity.name}_ressource 
 #end
 
 if __name__ == "__main__":

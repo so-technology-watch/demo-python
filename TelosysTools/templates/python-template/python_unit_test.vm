@@ -1,0 +1,136 @@
+##--------------------------------------------------------------------------------------------------------
+#set( $cpt = 0 )
+#set( $condition = "" )
+#foreach( $field in $entity.keyAttributes )
+#set( $cpt = $cpt + 1 )
+#if( $foreach.count < $entity.keyAttributes.size() )
+#set( $condition = $condition + "test_primary_key_" + $cpt + ", " )
+#else
+#set( $condition = $condition + "test_primary_key_" + $cpt)
+#end
+#end
+##---------------------------------------------------------------------------------------------------------
+import unittest
+import datetime
+
+from entities.$entity.name import $entity.name
+from services import ${entity.name}_service as commons_${entity.name.toLowerCase()}_service
+${entity.name.toLowerCase()}_service = commons_${entity.name.toLowerCase()}_service.${entity.name}Service("$entity.name")
+
+#if( ! $entity.hasCompositePrimaryKey() )
+#foreach( $field in $entity.keyAttributes)
+#if( $field.isNumberType() )
+test_primary_key_1 = 200
+#else
+test_primary_key_1 = "BBB"
+#end
+#end
+#else
+#set( $cpt = 0 )
+#foreach( $field in $entity.keyAttributes)
+#set( $cpt = $cpt + 1)
+#if( $field.isNumberType() )
+test_primary_key_$cpt = 100
+#else
+test_primary_key_$cpt = "AAA"
+#end
+#end
+#end
+
+
+class TestDao${entity.name}(unittest.TestCase):
+
+    def test_dao(self):
+
+        print("--- test ${entity.name}Persistence ")
+
+        entity = ${entity.name}()
+        ${SHARP} --- Key values
+#set( $cpt = 0 )
+#foreach( $field in $entity.keyAttributes )
+#set( $cpt = $cpt + 1 )
+        entity.$field.name = test_primary_key_$cpt
+#end
+        ${SHARP} --- Other values
+#foreach( $field in $entity.nonKeyAttributes )
+#if($field.isFK())
+#if($field.isNumberType())
+        entity.$field.name = 100	
+#else
+        entity.$field.name = "AAA"
+#end	
+#elseif( $field.isNumberType())
+        entity.$field.name = 1
+#elseif( $field.isTemporalType())
+        entity.$field.name = datetime.datetime.strptime("1011-11-11 00:00:00", "%Y-%m-%d %H:%M:%S")
+#else
+        entity.$field.name = "test_value"
+#end
+#end
+
+        ${SHARP} --- DELETE
+        print("Delete : {}".format(entity.to_dict()))
+        ${entity.name.toLowerCase()}_service.delete(entity)
+        cpt_initial = ${entity.name.toLowerCase()}_service.count_all()
+        print("Initial count = {}".format(cpt_initial))
+
+        ${SHARP} --- CREATE
+        print("Create : {}".format(entity))
+        ${entity.name.toLowerCase()}_service.insert(entity)
+        self.assertTrue(${entity.name.toLowerCase()}_service.exists_by_id($condition))
+        self.assertTrue(${entity.name.toLowerCase()}_service.exists(entity))
+
+        cpt = ${entity.name.toLowerCase()}_service.count_all()
+        self.assertEqual(cpt, cpt_initial + 1)
+        print("Count = {}".format(cpt))
+
+        ${SHARP} --- FIND
+        print("Find by id ...")
+        element = ${entity.name.toLowerCase()}_service.find_by_id($condition)
+        self.assertIsNotNone(element)
+        self.assertEqual(type(element), type(entity))
+        self.assertEqual(element.to_dict(), entity.to_dict())
+        self.assertTrue(${entity.name.toLowerCase()}_service.exists(entity))
+        print("Found : {}".format(element))
+
+        ${SHARP} --- UPDATE
+        ${SHARP} --- Change values
+#foreach( $field in $entity.nonKeyAttributes )
+#if( ! $field.isFK() )
+#if( $field.isNumberType() )
+        entity.$field.name = 2
+#elseif( $field.isTemporalType())
+        entity.$field.name = datetime.datetime.strptime("2022-02-22 00:00:00", "%Y-%m-%d %H:%M:%S")
+#else
+        entity.$field.name = "test_changement"
+#end
+#end
+#end
+        element = ${entity.name.toLowerCase()}_service.update(entity)
+        print("Update : {}".format(entity))
+        self.assertEqual(element, 1)
+
+        ${SHARP} --- RELOAD AFTER UPDATE
+        print("Find by id ...")
+        element = ${entity.name.toLowerCase()}_service.find_by_id($condition)
+        self.assertIsNotNone(element)
+        self.assertEqual(type(element), type(entity))
+        self.assertEqual(element.to_dict(), entity.to_dict())
+        print("Found : {}".format(element))
+
+        ${SHARP} --- DELETE
+        element = ${entity.name.toLowerCase()}_service.delete_by_id($condition)
+        self.assertEqual(element, 1)
+        self.assertEqual(${entity.name.toLowerCase()}_service.delete_by_id($condition), False)
+        self.assertEqual(${entity.name.toLowerCase()}_service.delete(entity), 0)
+
+        cpt_final = ${entity.name.toLowerCase()}_service.count_all()
+        self.assertEqual(cpt_final, cpt_initial)
+        print("Final count = {}".format(cpt))
+
+        self.assertFalse(${entity.name.toLowerCase()}_service.exists_by_id($condition))
+        self.assertFalse(${entity.name.toLowerCase()}_service.exists(entity))
+        self.assertEqual(${entity.name.toLowerCase()}_service.find_by_id($condition), False)
+
+        print("Normal end of persistence service test.")
+
