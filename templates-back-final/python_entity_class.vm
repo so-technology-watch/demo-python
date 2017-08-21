@@ -9,51 +9,7 @@ from commons.get_connexion import Base
 
 class ${entity.name}(Base):
     __tablename__ = '$entity.name'
-## --- Entity without Composite keys
-#if( ! $entity.hasCompositePrimaryKey())
-#foreach( $field in $entity.keyAttributes )
-## --- Key attributes
-#if($field.wrapperType == 'BigDecimal' or $field.wrapperType == 'Short' )
-#set( $type = 'Integer' )
-#else
-#set( $type = $field.wrapperType )
-#end
-    $field.name = Column($type, primary_key=True#if($field.isNotNull()), nullable=False#end, unique=True#if($field.isAutoIncremented()), autoincrement=True#end)
-#set( $entity = $table )
-#end
-## --- Non key attributes
-#foreach( $field in $entity.nonKeyAttributes )
-#if($field.wrapperType == 'BigDecimal' or $field.wrapperType == 'Short' )
-#set( $type = 'Integer' )
-#else
-#set( $type = $field.wrapperType )
-#end
-    $field.name = Column($type#if($field.isFK())#set($entity = $field.referencedEntity), ForeignKey('${field.referencedEntity}.${entity.keyAttributesNamesAsString('')}', ondelete='RESTRICT')#end#if($field.isNotNull()), nullable=False#end)
-#set( $entity = $table )
-#end
-#else
-## --- Entity with Composite Key
-#foreach( $field in $entity.keyAttributes )
-## --- Key attributes
-#if($field.wrapperType == 'BigDecimal' or $field.wrapperType == 'Short' )
-#set( $type = 'Integer' )
-#else
-#set( $type = $field.wrapperType )
-#end
-    $field.name = Column($type#if($field.isFK())#set($entity = $field.referencedEntity), ForeignKey('${field.referencedEntity}.${entity.keyAttributesNamesAsString('')}')#end, primary_key=True#if($field.isNotNull()), nullable=False#end)
-#set( $entity = $table )
-#end
-#foreach( $field in $entity.nonKeyAttributes )
-## --- Non key attributes
-#if($field.wrapperType == 'BigDecimal' or $field.wrapperType == 'Short' )
-#set( $type = 'Integer' )
-#else
-#set( $type = $field.wrapperType )
-#end
-    $field.name = Column($type#if($field.isFK())#set($entity = $field.referencedEntity), ForeignKey('${field.referencedEntity}.${entity.keyAttributesNamesAsString('')}', ondelete='RESTRICT')#end#if($field.isNotNull()), nullable=False#end)
-#set( $entity = $table )
-#end
-#end
+    __table_args__ = {'autoload': True}
 
 #set( $entity = $table )
     def __init__(self#foreach( $field in $entity.attributes ), $field.name='null'#end):

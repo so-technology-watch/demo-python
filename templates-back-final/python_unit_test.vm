@@ -10,6 +10,9 @@
 #end
 #end
 ##---------------------------------------------------------------------------------------------------------
+${SHARP} Python class for entity ${entity.name} 
+${SHARP} Created on $today.date ( Time $today.time )
+
 import unittest
 import datetime
 

@@ -1,3 +1,4 @@
+#set( $type_id = '' )
 from bottle import get, post, put, delete, request, route, response, hook
 from services import ${entity.name}_service as commons_entity_service
 from jsonSerializer.${entity.name}JsonSerializer import ${entity.name}JsonSerializer
@@ -103,11 +104,10 @@ def update($entity.keyAttributesNamesAsString('')):
         body_str = body.read().decode('utf-8')
         entity = json_serializer.from_json(body_str)
 #set( $condition = "" )
-#foreach($field in $entity.keyAttributes) 
-#set( $type_id = ${field.databaseType.toLowerCase()})
-#if( $type_id == 'integer' or $type_id == 'smallint' )
+#foreach($field in $entity.keyAttributes)
+#if( $field.isNumberType()) 
 #set( $type_id = 'int' )
-#elseif( $type_id == 'varchar' )
+#elseif( ! $field.isDateType() )
 #set( $type_id = 'str' )
 #end
 #if( $foreach.count < $entity.keyAttributes.size() )
@@ -134,7 +134,7 @@ def update($entity.keyAttributesNamesAsString('')):
         return {"error": 500, "error_description": "{}".format(e)}
 
 
-@put('/api/v1/${entity.name.toLowerCase()}/')
+@put('/api/v1/${entity.name.toLowerCase()}')
 def save():
     try:
         body = request.body
