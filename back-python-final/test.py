@@ -35,32 +35,32 @@ from entities.Workgroup import Workgroup
 from services import Workgroup_service as commons_workgroup_service
 
 
-from commons.UnitTest.unit_test_Author import TestDaoAuthor
-from commons.UnitTest.unit_test_Badge import TestDaoBadge
-from commons.UnitTest.unit_test_Book import TestDaoBook
-from commons.UnitTest.unit_test_BookOrder import TestDaoBookOrder
-from commons.UnitTest.unit_test_BookOrderItem import TestDaoBookOrderItem
-from commons.UnitTest.unit_test_Country import TestDaoCountry
-from commons.UnitTest.unit_test_Customer import TestDaoCustomer
-from commons.UnitTest.unit_test_Employee import TestDaoEmployee
-from commons.UnitTest.unit_test_EmployeeGroup import TestDaoEmployeeGroup
-from commons.UnitTest.unit_test_Publisher import TestDaoPublisher
-from commons.UnitTest.unit_test_Review import TestDaoReview
-from commons.UnitTest.unit_test_Shop import TestDaoShop
-from commons.UnitTest.unit_test_Synopsis import TestDaoSynopsis
-from commons.UnitTest.unit_test_Workgroup import TestDaoWorkgroup
+from commons.UnitTest.Author_unit_test_ import TestDaoAuthor
+from commons.UnitTest.Badge_unit_test_ import TestDaoBadge
+from commons.UnitTest.Book_unit_test_ import TestDaoBook
+from commons.UnitTest.BookOrder_unit_test_ import TestDaoBookOrder
+from commons.UnitTest.BookOrderItem_unit_test_ import TestDaoBookOrderItem
+from commons.UnitTest.Country_unit_test_ import TestDaoCountry
+from commons.UnitTest.Customer_unit_test_ import TestDaoCustomer
+from commons.UnitTest.Employee_unit_test_ import TestDaoEmployee
+from commons.UnitTest.EmployeeGroup_unit_test_ import TestDaoEmployeeGroup
+from commons.UnitTest.Publisher_unit_test_ import TestDaoPublisher
+from commons.UnitTest.Review_unit_test_ import TestDaoReview
+from commons.UnitTest.Shop_unit_test_ import TestDaoShop
+from commons.UnitTest.Synopsis_unit_test_ import TestDaoSynopsis
+from commons.UnitTest.Workgroup_unit_test_ import TestDaoWorkgroup
 
-author_service = commons_author_service.AuthorService("Author")
-badge_service = commons_badge_service.BadgeService("Badge")
-book_service = commons_book_service.BookService("Book")
-bookorder_service = commons_bookorder_service.BookOrderService("BookOrder")
-country_service = commons_country_service.CountryService("Country")
-customer_service = commons_customer_service.CustomerService("Customer")
-employee_service = commons_employee_service.EmployeeService("Employee")
-publisher_service = commons_publisher_service.PublisherService("Publisher")
-shop_service = commons_shop_service.ShopService("Shop")
-synopsis_service = commons_synopsis_service.SynopsisService("Synopsis")
-workgroup_service = commons_workgroup_service.WorkgroupService("Workgroup")
+author_service = commons_author_service.AuthorService()
+badge_service = commons_badge_service.BadgeService()
+book_service = commons_book_service.BookService()
+bookorder_service = commons_bookorder_service.BookOrderService()
+country_service = commons_country_service.CountryService()
+customer_service = commons_customer_service.CustomerService()
+employee_service = commons_employee_service.EmployeeService()
+publisher_service = commons_publisher_service.PublisherService()
+shop_service = commons_shop_service.ShopService()
+synopsis_service = commons_synopsis_service.SynopsisService()
+workgroup_service = commons_workgroup_service.WorkgroupService()
 
 
 if __name__ == '__main__':
