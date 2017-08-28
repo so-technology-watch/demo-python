@@ -1,106 +1,85 @@
+# Python class for service of Workgroup 
+# Created on 2017-08-25 ( Time 18:18:33 )
+
 import commons.generic_dao as dao_commons
 from entities.Workgroup import Workgroup
+from sqlalchemy import text
+from services.commons import common_service
 
 
 class WorkgroupService:
-    def __init__(self, entity):
-        self.dao = dao_commons.GenericDao(entity, Workgroup)
+    def __init__(self):
+        self.dao = dao_commons.GenericDao(Workgroup)
 
     def find_by_id(self, id):
         """
         Tries to find an entity using its Id / Primary Key
-        :param _id:
-        :return: entity
+        :param id: PK of the entity to find
+        :return: False if entity not found, entity if found
         """
         request = build_query(id)
-        query = sqlalchemy_query(request)
-        exist = self.dao.do_exists(query)
-        if exist:
-            return self.dao.do_select(query)
-        else:
-            return False
+        return common_service.find_by_id(self.dao, request)
 
     def find_all(self):
         """
         Finds all entities.
         :return:  all entities
         """
-        return self.dao.do_select_all()
+        return common_service.find_all(self.dao)
 
     def insert(self, entity):
         """
         Insert the given entity in the database
         :param entity: to be inserted (supposed to have a valid Id/PK )
-        :return: entity
+        :return: false if not found, entity if found
         """
         request = build_query(entity.id)
-        query = sqlalchemy_query(request)
-        exist = self.dao.do_exists(query)
-        if exist:
-            return False
-        else:
-            return self.dao.do_insert(entity)
+        return common_service.insert(self.dao, request, entity)
 
     def update(self, entity):
         """
         Updates the given entity in the database
         :param entity: to be updated (supposed to have a valid Id/PK )
-        :return: true if the entity has been updated, false if not found and not updated
+        :return: true if entity updated, false if not found
         """
         request = build_query(entity.id)
-        query = sqlalchemy_query(request)
-        exist = self.dao.do_exists(query)
-        if exist:
-            return self.dao.do_update(entity, query)
-        else:
-            return False
+        return common_service.update(self.dao, request, entity)
 
     def save(self, entity):
         """
-        Updates ou creates the given entity in the database
+        Updates or creates the given entity in the database
         :param entity: to be updated or created (supposed to have a valid Id/PK )
-        :return: true if the entity has been updated, false if not found and not updated
+        :return: json with isNew attribute (True if created) and entity (created or updated)
         """
         request = build_query(entity.id)
-        query = sqlalchemy_query(request)
-        exist = self.dao.do_exists(query)
-        if exist:
-            return self.dao.do_update(entity, query)
-        else:
-            return self.dao.do_insert(entity)
+        return common_service.save(self.dao, request, entity)
 
     def delete_by_id(self, id):
         """
         Deletes an entity using its Id / Primary Key
-        :param _id:
+        :param id: PK of the entity to delete
         :return: true if the entity has been deleted, false if not found and not deleted
         """
         request = build_query(id)
-        query = sqlalchemy_query(request)
-        exist = self.dao.do_exists(query)
-        if exist:
-            return self.dao.do_delete(query)
-        else:
-            return False
+        return common_service.delete_by_id(self.dao, request)
 
     def delete(self, entity):
         """
-        Deletes an entity using its Id / Primary Key
-        :param _id:
-        :return: true if the entity has been deleted, false if not found and not deleted
+        Deletes an entity
+        :param entity: to delete
+        :return: 1 if the entity has been deleted, 0 if not found and not deleted
         """
         request = build_query(entity.id)
-        query = sqlalchemy_query(request)
-        return self.dao.do_delete(query)
+        return common_service.delete(self.dao, request)
 
     def exists_by_id(self, id):
         """
         Ckeck if an Id / Primary Key is in the entity table
+        :param id: PK to check in database
         :return: true or false
         """
         request = build_query(id)
-        query = sqlalchemy_query(request)
-        return self.dao.do_exists(query)
+        return common_service.exists_by_id(self.dao, request)
 
     def exists(self, entity):
         """
@@ -108,30 +87,15 @@ class WorkgroupService:
         :return: true or false
         """
         request = build_query(entity.id)
-        query = sqlalchemy_query(request)
-        return self.dao.do_exists(query)
+        return common_service.exists(self.dao, request)
 
     def count_all(self):
         """
         Counts all the entity present in the entity table
         :return: the number of rows in the entity table
         """
-        return self.dao.do_count_all()
+        return common_service.count_all(self.dao)
 
 
 def build_query(id):
-    return {
-        "id_1": Workgroup.id == '{}'.format(id),
-    }
-
-
-def sqlalchemy_query(request):
-        cpt = 0
-        query = ""
-        for value in request:
-            cpt = cpt + 1
-            if cpt < len(request):
-                query = query + request[value] + " and "
-            else:
-                query = query + request[value]
-        return query
+    return text("Workgroup.id == '{}'".format(id))
