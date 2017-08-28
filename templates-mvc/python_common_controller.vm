@@ -1,0 +1,32 @@
+from bottle import view, route, response, hook, TEMPLATE_PATH, template
+
+TEMPLATE_PATH[:] = ['templates']
+
+
+@hook('after_request')
+def init_response():
+    response.content_type = 'text/html'
+
+
+@route('/')
+@route('/home')
+@view("navigation_bar.tpl")
+def home():
+    body = template('home.tpl', root="templates")
+    return {"body": body}
+
+
+def error(code, message):
+    error = template('footer.tpl', code=code, message=message, mode="danger")
+    return {"body": error}
+
+
+def success(code, message):
+    error = template('footer.tpl', code=code, message=message, mode="success")
+    return {"body": error}
+
+
+def get_all(json_serializer, entities, entity_class, footer):
+    list = [json_serializer.to_json(entity) for entity in entities]
+    output = template('{}.tpl'.format(entity_class), list=list, footer=footer)
+    return {"body": output}

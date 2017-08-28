@@ -1,0 +1,29 @@
+#set( $url = "http://localhost:3000/" )
+<ol class="breadcrumb">
+  <li class="breadcrumb-item active">Home</li>
+</ol>
+
+
+<div class="container">
+    <h2></h2>
+    <div class="container">
+        <div class="panel-group">
+            <div class="panel panel-info">
+                <div class="panel-heading"><h3><span class="glyphicon glyphicon-leaf"></span> Home</h3></div>
+                <div class="panel-body">
+                    <ul class="list-group">
+#foreach( $entity in $selectedEntities )
+                        <li class = "list-group-item list-group-item-action">
+                            <a href="${url}${entity.name.toLowerCase()}">${entity.name}</a>
+                        </li>
+#end
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

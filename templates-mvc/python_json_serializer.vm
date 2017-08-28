@@ -1,0 +1,28 @@
+import json
+import datetime
+from entities.${entity.name} import ${entity.name}
+
+
+class ${entity.name}JsonSerializer(object):
+    def to_json(self, entity: ${entity.name}):
+        return {
+#foreach($field in $entity.attributes)
+#if($field.isDateType() or $field.databaseType == 'DATETIME' or $field.databaseType == 'TIMESTAMP')
+            "${field.name}": str(entity.${field.name}),
+#else
+            "${field.name}": entity.${field.name},
+#end
+#end
+        }
+
+    def from_json(self, json_content: str):
+        data = json.loads(json_content)
+        entity = ${entity.name}()
+#foreach( $field in $entity.attributes)
+#if( ! $field.isDateType() and $field.databaseType != 'DATETIME' and $field.databaseType != 'TIMESTAMP')
+        entity.${field.name} = data['${field.name}']
+#else
+        entity.${field.name} = datetime.datetime.strptime(data['${field.name}'], "%Y-%m-%d %H:%M:%S")
+#end
+#end
+        return entity

@@ -1,0 +1,14 @@
+${SHARP} Python class for run the app
+${SHARP} Created on $today.date ( Time $today.time )
+
+from bottle import run
+import bottle
+
+#foreach( $entity in $selectedEntities )
+import controllers.${entity.name}_controller 
+#end
+
+if __name__ == "__main__":
+    run(host='localhost', port=3000)
+
+app = bottle.default_app()

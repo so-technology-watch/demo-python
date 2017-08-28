@@ -1,0 +1,119 @@
+#set( $url = "http://localhost:3000/" )
+#set( $table = $entity )
+<ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="${url}home">Home</a></li>
+    <li class="breadcrumb-item active"><a href="${url}${entity.name.toLowerCase()}">$entity.name</a></li>
+    <li class="breadcrumb-item active">Create $entity.name</li>
+</ol>
+
+
+<div class="container">
+    <h2></h2>
+    <div class="container">
+        <form id="car_form" class="form-horizontal" method="post">
+            <div class="panel-group">
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+						<h3>
+							<span class="glyphicon glyphicon-leaf"></span>
+							Create $entity.name
+                            <a href="${url}${entity.name.toLowerCase()}">
+                                <button type="button" formaction="${url}${entity.name.toLowerCase()}" class="btn btn-link pull-right">
+                                    List
+                                </button>
+                            </a>
+						</h3>
+					</div>
+                    <div class="panel-body">
+#if( ! $entity.hasCompositePrimaryKey())
+#foreach( $field in $entity.keyAttributes )
+                        <div class="form-group">
+                            <label for="$field.name" class="col-sm-2">$field.name #if($field.isDatabaseNotNull())*#end</label>
+                            <div class="col-sm-8">
+                                <input class="form-control" id="$field.name" name='$field.name' value="auto value" disabled/>
+                            </div>
+                        </div>
+#end
+#foreach( $field in $entity.nonKeyAttributes )
+#if( $field.isFK() )
+#set( $foreign_table = $field.referencedEntityName )
+#set( $entity = $field.referencedEntity )
+                        <div class="form-group">
+                            <label for="$field.name" class="col-sm-2">$field.name #if($field.isDatabaseNotNull())*#end</label>
+                            <div class="col-sm-8">
+                                <select id='$field.name' name='$field.name' class="selectpicker">
+                                    <option value=""></option>
+                                    % for $foreign_table in list_$fn.toLowerCase($foreign_table) :
+                                    <option value="{{${foreign_table}['$entity.keyAttributesNamesAsString('')']}}" >{{${foreign_table}['$entity.keyAttributesNamesAsString('')']}} - #foreach( $field in $entity.nonKeyAttributes ){{${foreign_table}['$field.name']}} #end</option>
+                                    % end
+                                </select>
+                                <a href="${url}car/fk">
+                                    <button type="submit" formaction="${url}car/fk" name="fk" class="btn btn-default"><span class="glyphicon glyphicon-new-window"></span></button>
+                                </a>
+                            </div>
+                        </div>
+#else
+                        <div class="form-group">
+                            <label for="$field.name" class="col-sm-2">$field.name #if($field.isDatabaseNotNull())*#end</label>
+                            <div class="col-sm-8">
+                                <input class="form-control" id="$field.name" name='$field.name' value=""/>
+                            </div>
+                        </div>
+#end
+#end
+#else
+#foreach( $field in $entity.attributes )
+#if( $field.isFK() )
+#set( $foreign_table = $field.referencedEntityName )
+#set( $entity = $field.referencedEntity )
+                        <div class="form-group">
+                            <label for="$field.name" class="col-sm-2">$field.name #if($field.isDatabaseNotNull())*#end</label>
+                            <div class="col-sm-8">
+                                <select id='$field.name' name='$field.name' class="selectpicker">
+                                    <option value=""></option>
+                                    % for $foreign_table in list_$fn.toLowerCase($foreign_table) :
+                                    <option value="{{${foreign_table}['$entity.keyAttributesNamesAsString('')']}}" >{{${foreign_table}['$entity.keyAttributesNamesAsString('')']}} - #foreach( $field in $entity.nonKeyAttributes ){{${foreign_table}['$field.name']}} #end</option>
+                                    % end
+                                </select>
+                                <a href="${url}car/fk">
+                                    <button type="submit" formaction="${url}car/fk" name="fk" class="btn btn-default"><span class="glyphicon glyphicon-new-window"></span></button>
+                                </a>
+                            </div>
+                        </div>
+#else
+                        <div class="form-group">
+                            <label for="$field.name" class="col-sm-2">$field.name #if($field.isDatabaseNotNull())*#end</label>
+                            <div class="col-sm-8">
+                                <input class="form-control" id="$field.name" name='$field.name' value=""/>
+                            </div>
+                        </div>
+#end
+#end
+#end
+#set( $entity = $table )
+                    </div>
+                    <div class="panel-footer text-center">
+                        <a href="${url}${entity.name.toLowerCase()}/create">
+                                <button type="submit" formaction="${url}${entity.name.toLowerCase()}/create" name="non_fk" class="btn btn-success"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                        </a>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+#foreach( $field in $entity.attributes )
+#if( $field.isTemporalType() )
+<script type="text/javascript">
+$(document).ready(function() {
+    $(function () {
+        $('${SHARP}${field.name}').datepicker({
+            format: 'yyyy-mm-dd'
+        });
+    });
+});
+</script>
+#end
+#end

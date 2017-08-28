@@ -1,0 +1,59 @@
+#set( $url = "http://localhost:3000/" )
+#set( $prefix = "{{" + $entity.name + "['")
+#set( $suffix = "']}}" )
+<ol class="breadcrumb">
+  <li class="breadcrumb-item"><a href="${url}home">Home</a></li>
+  <li class="breadcrumb-item active">${entity.name}</li>
+</ol>
+
+
+<div class="container">
+    <h2></h2>
+    <div class="container">
+        <div class="panel-group">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h3>
+                        <span class="glyphicon glyphicon-leaf"></span>
+                        ${entity.name} List
+                        <a href="${url}${entity.name.toLowerCase()}/form/create" title="Create a new entity">
+                            <button type="button" class="btn btn-success pull-right"><span class="glyphicon glyphicon-plus"></span> Create</button>
+                        </a>
+                    </h3>
+                </div>
+                <div class="panel-body">
+
+                    <h1></h1>
+                    {{!footer}}
+                    <table class="table table-striped table-bordered text-center">
+                        <thead>
+                        <tr>
+#foreach( $field in $entity.attributes )
+                                <td><b>$field.name</b></td>
+#end
+                        </tr>
+                        </thead>
+                        <tbody>
+                        % for $entity.name in list :
+                        <tr onclick="window.location.href = '${url}${entity.name.toLowerCase()}/form/update/$entity.keyAttributesNamesAsString('/', $prefix, $suffix)';" style="cursor: pointer">
+#foreach( $field in $entity.attributes )
+                                <td>{{${entity.name}['${field.name}']}}</td>
+#end
+                                <td>
+                                    <a href="${url}${entity.name.toLowerCase()}/delete/$entity.keyAttributesNamesAsString('/', $prefix, $suffix)" title="Delete this entity"><span
+                                            class="glyphicon glyphicon-trash"></span></a>
+                                </td>
+                        </tr>
+                        % end
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

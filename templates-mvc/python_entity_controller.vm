@@ -1,0 +1,177 @@
+#set( $foreign_table = '' )
+#set( $cpt = 0 )
+#set( $check_fk = false )
+from bottle import view, request, route, template
+import datetime
+
+from services import ${entity.name}_service as commons_entity_service
+from jsonSerializer.${entity.name}JsonSerializer import ${entity.name}JsonSerializer
+from entities.$entity.name import $entity.name
+from controllers.commons import common_controller
+${entity.name.toLowerCase()}_service = commons_entity_service.${entity.name}Service()
+json_serializer = ${entity.name}JsonSerializer()
+
+#foreach( $attribute in $entity.attributes )
+#if( $attribute.isFK() )
+#set( $check_fk = true )
+#set( $cpt = $cpt + 1 )
+#set( $foreign_table = $fn.toLowerCase($attribute.referencedEntityName) )
+from controllers.$fn.capitalize($foreign_table)_controller import ${foreign_table}_service
+from jsonSerializer.$fn.capitalize(${foreign_table})JsonSerializer import $fn.capitalize(${foreign_table})JsonSerializer
+${foreign_table}_json_serializer = $fn.capitalize(${foreign_table})JsonSerializer()
+
+#end
+#end
+
+@route('/${entity.name.toLowerCase()}')
+@view("navigation_bar.tpl")
+def get_all():
+    try:
+        entities = ${entity.name.toLowerCase()}_service.find_all()
+        return common_controller.get_all(json_serializer, entities, "${entity.name}", "")
+    except TypeError as e:
+        print(e)
+        return {"body": "{}".format(e)}
+
+
+#set( $list = "" )
+@route('/${entity.name.toLowerCase()}/form/create')
+@view("navigation_bar.tpl")
+def form_for_create():
+
+#foreach( $attribute in $entity.attributes )
+#if( $attribute.isFK() )
+#set( $foreign_key = $fn.toLowerCase($attribute.referencedEntityName) )
+    entity_${foreign_key} = ${foreign_key}_service.find_all()
+    list_${foreign_key} = [${foreign_key}_json_serializer.to_json(entity) for entity in entity_${foreign_key}]
+
+#if( $foreach.count < $cpt )
+#set( $list = $list + "list_" + $foreign_key + "=list_" + $foreign_key + ", ")
+#else
+#set( $list = $list + "list_" + $foreign_key + "=list_" + $foreign_key)
+#end
+#end
+#end
+    body = template('${entity.name}_form_create.tpl'#if($check_fk), $list#end, footer="")
+    return {"body": body}
+
+
+#set( $list = "" )
+@route('/${entity.name.toLowerCase()}/form/update/$entity.keyAttributesNamesAsString('/', '<', '>')')
+@view("navigation_bar.tpl")
+def form_for_update($entity.keyAttributesNamesAsString(', ')):
+
+    entity = ${entity.name.toLowerCase()}_service.find_by_id($entity.keyAttributesNamesAsString(', '))
+
+#foreach( $attribute in $entity.attributes )
+#if( $attribute.isFK() )
+#set( $foreign_key = $fn.toLowerCase($attribute.referencedEntityName) )
+    entity_${foreign_key} = ${foreign_key}_service.find_all()
+    select_${foreign_key} = ${foreign_key}_service.find_by_id(entity.$attribute.name).to_dict()
+    list_${foreign_key} = [${foreign_key}_json_serializer.to_json(entities) for entities in entity_${foreign_key}]
+
+#if( $foreach.count < $cpt )
+#set( $list = $list + "list_" + ${foreign_key} + "=list_" + ${foreign_key} + ", " + "select_" + ${foreign_key} + "=select_" + ${foreign_key} + ", " )
+#else
+#set( $list = $list + "list_" + ${foreign_key} + "=list_" + ${foreign_key} + ", " + "select_" + ${foreign_key} + "=select_" + ${foreign_key})
+#end
+#end
+#end
+    body = template('${entity.name}_form_update.tpl'#if($check_fk), $list#end, entity=entity.to_dict(), footer="")
+    return {"body": body}
+
+
+#set( $list = "" )
+@route('/${entity.name.toLowerCase()}/create', method='POST')
+@view("navigation_bar.tpl")
+def create():
+    entity = ${entity.name}()
+#foreach( $field in $entity.attributes )
+#if( $field.isTemporalType() )
+    date_convert = request.forms.get('${field.name}')
+    entity.${field.name} = datetime.datetime.strptime(date_convert, "%Y-%m-%d")
+#else
+    entity.${field.name} = request.forms.get('${field.name}')
+#end
+#end
+    result = ${entity.name.toLowerCase()}_service.insert(entity)
+    if result:
+        if type(result) == $entity.name:
+            footer = template('footer.tpl', code=201, message="Created", mode="success")
+#foreach( $attribute in $entity.attributes )
+#if( $attribute.isFK() )
+#set( $foreign_key = $fn.toLowerCase($attribute.referencedEntityName) )
+            entity_${foreign_key} = ${foreign_key}_service.find_all()
+            select_${foreign_key} = ${foreign_key}_service.find_by_id(entity.$attribute.name).to_dict()
+            list_${foreign_key} = [${foreign_key}_json_serializer.to_json(entities) for entities in entity_${foreign_key}]
+
+#if( $foreach.count < $cpt )
+#set( $list = $list + "list_" + ${foreign_key} + "=list_" + ${foreign_key} + ", " + "select_" + ${foreign_key} + "=select_" + ${foreign_key} + ", " )
+#else
+#set( $list = $list + "list_" + ${foreign_key} + "=list_" + ${foreign_key} + ", " + "select_" + ${foreign_key} + "=select_" + ${foreign_key})
+#end
+#end
+#end
+            body = template('${entity.name}_form_update.tpl'#if($check_fk), $list#end, entity=entity.to_dict(), footer=footer)
+            return {"body": body}
+        else:
+            return common_controller.error(500, result)
+    else:
+        return common_controller.error(409, "Already in database")
+
+
+#set( $list = "" )
+@route('/${entity.name.toLowerCase()}/update/$entity.keyAttributesNamesAsString('/', '<', '>')', method='POST')
+@view('navigation_bar.tpl')
+def update($entity.keyAttributesNamesAsString(', ')):
+    entity = ${entity.name}()
+#foreach( $field in $entity.keyAttributes )
+    entity.${field.name} = ${field.name}
+#end
+#foreach( $field in $entity.nonKeyAttributes )
+#if( $field.isTemporalType() )
+    date_convert = request.forms.get('${field.name}')
+    entity.${field.name} = datetime.datetime.strptime(date_convert, "%Y-%m-%d")
+#else
+    entity.${field.name} = request.forms.get('${field.name}')
+#end
+#end
+    result = ${entity.name.toLowerCase()}_service.update(entity)
+    if result:
+        if type(result) == int and result > 0:
+            footer = template('footer.tpl', code=200, message="Updated", mode="success")
+#foreach( $attribute in $entity.attributes )
+#if( $attribute.isFK() )
+#set( $foreign_key = $fn.toLowerCase($attribute.referencedEntityName) )
+            entity_${foreign_key} = ${foreign_key}_service.find_all()
+            select_${foreign_key} = ${foreign_key}_service.find_by_id(entity.$attribute.name).to_dict()
+            list_${foreign_key} = [${foreign_key}_json_serializer.to_json(entities) for entities in entity_${foreign_key}]
+
+#if( $foreach.count < $cpt )
+#set( $list = $list + "list_" + ${foreign_key} + "=list_" + ${foreign_key} + ", " + "select_" + ${foreign_key} + "=select_" + ${foreign_key} + ", " )
+#else
+#set( $list = $list + "list_" + ${foreign_key} + "=list_" + ${foreign_key} + ", " + "select_" + ${foreign_key} + "=select_" + ${foreign_key})
+#end
+#end
+#end
+            body = template('${entity.name}_form_update.tpl'#if($check_fk), $list#end, entity=entity.to_dict(), footer=footer)
+            return {"body": body}
+        else:
+            return common_controller.error(500, result)
+    else:
+        return common_controller.error(404, "Entity not found")
+
+
+@route('/${entity.name.toLowerCase()}/delete/$entity.keyAttributesNamesAsString('/', '<', '>')')
+@view('navigation_bar.tpl')
+def delete($entity.keyAttributesNamesAsString(', ')):
+        result = ${entity.name.toLowerCase()}_service.delete_by_id($entity.keyAttributesNamesAsString(', '))
+        entities = ${entity.name.toLowerCase()}_service.find_all()
+        if result:
+            if type(result) == int and result > 0:
+                footer = template('footer.tpl', code=204, message="Deleted", mode="success")
+                return common_controller.get_all(json_serializer, entities, "${entity.name}", footer)
+            else:
+                return common_controller.error(500, result)
+        else:
+            return common_controller.error(400, "Bad request")
