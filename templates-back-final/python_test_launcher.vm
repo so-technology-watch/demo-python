@@ -1,10 +1,4 @@
 ##--------------------------------------------------------------------------------------------------------
-#set( $persistenceInterface = "${entity.name}Persistence" )
-#set( $values   = $fn.buildValues($entity.attributes, 1) )
-#set( $dataValues  = $fn.buildValues($entity.nonKeyAttributes , 1) )
-#set( $dataValues2 = $fn.buildValues($entity.nonKeyAttributes , 2) )
-#set( $keyValues3  = $fn.buildValues($entity.keyAttributes,     3) )
-#set( $Math = $loader.loadClass("java.lang.Math") )
 #set( $list1 = [] )
 #set( $list2 = [] )
 #set( $list3 = [] )
@@ -22,12 +16,12 @@ from services import ${entity.name}_service as commons_${entity.name.toLowerCase
 #end
 
 #foreach( $entity in $selectedEntities )
-from commons.UnitTest.unit_test_${entity.name} import TestDao${entity.name}
+from commons.UnitTest.${entity.name}_unit_test_ import TestDao${entity.name}
 #end
 
 #foreach( $entity in $selectedEntities )
 #if( ! $entity.hasCompositePrimaryKey() )
-${entity.name.toLowerCase()}_service = commons_${entity.name.toLowerCase()}_service.${entity.name}Service("${entity.name}")
+${entity.name.toLowerCase()}_service = commons_${entity.name.toLowerCase()}_service.${entity.name}Service()
 #end
 #end
 

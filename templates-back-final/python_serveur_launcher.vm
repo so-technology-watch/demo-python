@@ -1,8 +1,11 @@
+${SHARP} Python class for run the app
+${SHARP} Created on $today.date ( Time $today.time )
+
 from bottle import run
 import bottle
 
 #foreach( $entity in $selectedEntities )
-import ressources.${entity.name}_ressource 
+import resources.${entity.name}_resource 
 #end
 
 if __name__ == "__main__":

@@ -1,3 +1,6 @@
+${SHARP} Python class for json serializer of ${entity.name} 
+${SHARP} Created on $today.date ( Time $today.time )
+
 import json
 import datetime
 from entities.${entity.name} import ${entity.name}
@@ -5,9 +8,14 @@ from entities.${entity.name} import ${entity.name}
 
 class ${entity.name}JsonSerializer(object):
     def to_json(self, entity: ${entity.name}):
+        """
+        Convert into a json
+        :param entity: entity to convert
+        :return: entity into json  
+        """
         return {
 #foreach($field in $entity.attributes)
-#if($field.isDateType() or $field.databaseType == 'DATETIME' or $field.databaseType == 'TIMESTAMP')
+#if($field.isTemporalType())
             "${field.name}": str(entity.${field.name}),
 #else
             "${field.name}": entity.${field.name},
@@ -16,13 +24,26 @@ class ${entity.name}JsonSerializer(object):
         }
 
     def from_json(self, json_content: str):
+        """
+        Convert a json into an object
+        :param json_content: json to convert
+        :return: entity object
+        """
         data = json.loads(json_content)
         entity = ${entity.name}()
-#foreach( $field in $entity.attributes)
-#if( ! $field.isDateType() and $field.databaseType != 'DATETIME' and $field.databaseType != 'TIMESTAMP')
-        entity.${field.name} = data['${field.name}']
-#else
+        if $entity.keyAttributesNamesAsString(' and ', '"', '"') in data:
+#foreach( $field in $entity.keyAttributes )
+            entity.${field.name} = data['${field.name}']
+#end
+        else:
+#foreach( $field in $entity.keyAttributes )
+            entity.${field.name} = None
+#end
+#foreach( $field in $entity.nonKeyAttributes)
+#if( $field.isTemporalType() )
         entity.${field.name} = datetime.datetime.strptime(data['${field.name}'], "%Y-%m-%d %H:%M:%S")
+#else
+        entity.${field.name} = data['${field.name}']
 #end
 #end
         return entity

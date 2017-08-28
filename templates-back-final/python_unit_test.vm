@@ -10,7 +10,7 @@
 #end
 #end
 ##---------------------------------------------------------------------------------------------------------
-${SHARP} Python class for entity ${entity.name} 
+${SHARP} Python class for unit test of ${entity.name} 
 ${SHARP} Created on $today.date ( Time $today.time )
 
 import unittest
@@ -18,7 +18,7 @@ import datetime
 
 from entities.$entity.name import $entity.name
 from services import ${entity.name}_service as commons_${entity.name.toLowerCase()}_service
-${entity.name.toLowerCase()}_service = commons_${entity.name.toLowerCase()}_service.${entity.name}Service("$entity.name")
+${entity.name.toLowerCase()}_service = commons_${entity.name.toLowerCase()}_service.${entity.name}Service()
 
 #if( ! $entity.hasCompositePrimaryKey() )
 #foreach( $field in $entity.keyAttributes)

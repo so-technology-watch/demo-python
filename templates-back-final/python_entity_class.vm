@@ -1,23 +1,25 @@
 ${SHARP} Python class for entity ${entity.name} 
 ${SHARP} Created on $today.date ( Time $today.time )
-#set( $table = "" )
-#set( $table = $entity )
 
-from sqlalchemy import *
-from commons.get_connexion import Base
+from commons.get_connection import Base
 
 
 class ${entity.name}(Base):
     __tablename__ = '$entity.name'
     __table_args__ = {'autoload': True}
 
-#set( $entity = $table )
     def __init__(self#foreach( $field in $entity.attributes ), $field.name='null'#end):
+        """
+        Init the table
+        """
 #foreach( $field in $entity.attributes )
         self.$field.name = $field.name
 #end
 
     def to_dict(self):
+        """
+        :return: the class as a dictionary
+        """
         return {
 #foreach( $field in $entity.attributes )
             "$field.name": self.$field.name,

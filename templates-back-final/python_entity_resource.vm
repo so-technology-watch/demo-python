@@ -1,0 +1,81 @@
+${SHARP} Python class for resource of ${entity.name} 
+${SHARP} Created on $today.date ( Time $today.time )
+
+from bottle import get, post, put, delete, response
+from services import ${entity.name}_service as CommonsEntityService
+from JsonSerializer.${entity.name}_json_serializer import ${entity.name}JsonSerializer
+from entities.$entity.name import $entity.name
+from resources.commons import common_resource
+
+${entity.name.toLowerCase()}_service = CommonsEntityService.${entity.name}Service()
+json_serializer = ${entity.name}JsonSerializer()
+
+
+@get('/api/v1/${entity.name.toLowerCase()}')
+def get_all():
+    try:
+        entities = ${entity.name.toLowerCase()}_service.find_all()
+        return common_resource.get_all(json_serializer, entities)
+    except TypeError as e:
+        return common_resource.error_500(e)
+ 
+
+@get('/api/v1/${entity.name.toLowerCase()}/$entity.keyAttributesNamesAsString('/', '<', '>')')
+def get_by_id($entity.keyAttributesNamesAsString(', ')):
+    try:
+        result = ${entity.name.toLowerCase()}_service.find_by_id($entity.keyAttributesNamesAsString(', '))      
+        return common_resource.get_by_id(result, ${entity.name}, json_serializer)
+    except TypeError as e:
+        return common_resource.error_500(e)
+
+
+@post('/api/v1/${entity.name.toLowerCase()}')
+def create():
+    try:
+        entity = common_resource.body_from_json(json_serializer)
+        result = ${entity.name.toLowerCase()}_service.insert(entity)
+        return common_resource.create(result, json_serializer, ${entity.name})
+    except TypeError as e:
+        return common_resource.error_500(e)
+
+
+@put('/api/v1/${entity.name.toLowerCase()}/$entity.keyAttributesNamesAsString('/', '<', '>')')
+def update($entity.keyAttributesNamesAsString(', ')):
+    try:
+        entity = common_resource.body_from_json(json_serializer)
+#foreach( $field in $entity.keyAttributes )
+        entity.$field.name = $field.name
+#end
+        result = ${entity.name.toLowerCase()}_service.update(entity)
+        return common_resource.update(result)
+    except TypeError as e:
+        return common_resource.error_500(e)
+
+
+@put('/api/v1/${entity.name.toLowerCase()}')
+def save():
+    try:
+        entity = common_resource.body_from_json(json_serializer)
+        result = ${entity.name.toLowerCase()}_service.save(entity)
+        return common_resource.save(result, ${entity.name}, json_serializer, entity)
+    except TypeError as e:
+        return common_resource.error_500(e)
+
+
+@delete('/api/v1/${entity.name.toLowerCase()}/$entity.keyAttributesNamesAsString('/', '<', '>')')
+def delete($entity.keyAttributesNamesAsString(', ')):
+    try:
+        result = ${entity.name.toLowerCase()}_service.delete_by_id($entity.keyAttributesNamesAsString(', '))
+        return common_resource.delete(result)
+    except TypeError as e:
+        return common_resource.error_500(e)
+
+
+@get('/api/v1/${entity.name.toLowerCase()}.count')
+def count():
+    try:
+        result = ${entity.name.toLowerCase()}_service.count_all()
+        return common_resource.count(result)
+    except TypeError as e:
+        print(e)
+        response.status = 400
