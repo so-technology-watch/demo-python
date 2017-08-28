@@ -1,20 +1,17 @@
 # Python class for entity Review 
-# Created on 2017-08-18 ( Time 16:29:15 )
+# Created on 2017-08-25 ( Time 18:18:32 )
 
-from sqlalchemy import *
-from commons.get_connexion import Base
+from commons.get_connection import Base
 
 
 class Review(Base):
     __tablename__ = 'Review'
-    customerCode = Column(String, ForeignKey('Customer.code'), primary_key=True, nullable=False)
-    bookId = Column(Integer, ForeignKey('Book.id'), primary_key=True, nullable=False)
-    reviewText = Column(String)
-    reviewNote = Column(Integer)
-    creation = Column(Date)
-    lastUpdate = Column(Date)
+    __table_args__ = {'autoload': True}
 
     def __init__(self, customerCode='null', bookId='null', reviewText='null', reviewNote='null', creation='null', lastUpdate='null'):
+        """
+        Init the table
+        """
         self.customerCode = customerCode
         self.bookId = bookId
         self.reviewText = reviewText
@@ -23,6 +20,9 @@ class Review(Base):
         self.lastUpdate = lastUpdate
 
     def to_dict(self):
+        """
+        :return: the class as a dictionary
+        """
         return {
             "customerCode": self.customerCode,
             "bookId": self.bookId,

@@ -1,24 +1,17 @@
 # Python class for entity Book 
-# Created on 2017-08-18 ( Time 16:29:15 )
+# Created on 2017-08-25 ( Time 18:18:32 )
 
-from sqlalchemy import *
-from commons.get_connexion import Base
+from commons.get_connection import Base
 
 
 class Book(Base):
     __tablename__ = 'Book'
-    id = Column(Integer, primary_key=True, nullable=False, unique=True)
-    publisherId = Column(Integer, ForeignKey('Publisher.code', ondelete='RESTRICT'), nullable=False)
-    authorId = Column(Integer, ForeignKey('Author.id', ondelete='RESTRICT'), nullable=False)
-    isbn = Column(String, nullable=False)
-    title = Column(String)
-    price = Column(Integer)
-    quantity = Column(Integer)
-    discount = Column(Integer)
-    availability = Column(Integer)
-    bestSeller = Column(Integer)
+    __table_args__ = {'autoload': True}
 
     def __init__(self, id='null', publisherId='null', authorId='null', isbn='null', title='null', price='null', quantity='null', discount='null', availability='null', bestSeller='null'):
+        """
+        Init the table
+        """
         self.id = id
         self.publisherId = publisherId
         self.authorId = authorId
@@ -31,6 +24,9 @@ class Book(Base):
         self.bestSeller = bestSeller
 
     def to_dict(self):
+        """
+        :return: the class as a dictionary
+        """
         return {
             "id": self.id,
             "publisherId": self.publisherId,

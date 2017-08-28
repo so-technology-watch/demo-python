@@ -1,22 +1,17 @@
 # Python class for entity Publisher 
-# Created on 2017-08-18 ( Time 16:29:15 )
+# Created on 2017-08-25 ( Time 18:18:32 )
 
-from sqlalchemy import *
-from commons.get_connexion import Base
+from commons.get_connection import Base
 
 
 class Publisher(Base):
     __tablename__ = 'Publisher'
-    code = Column(Integer, primary_key=True, nullable=False, unique=True)
-    countryCode = Column(String, ForeignKey('Country.code', ondelete='RESTRICT'), nullable=False)
-    name = Column(String)
-    email = Column(String)
-    contact = Column(String)
-    city = Column(String)
-    zipCode = Column(Integer)
-    phone = Column(String)
+    __table_args__ = {'autoload': True}
 
     def __init__(self, code='null', countryCode='null', name='null', email='null', contact='null', city='null', zipCode='null', phone='null'):
+        """
+        Init the table
+        """
         self.code = code
         self.countryCode = countryCode
         self.name = name
@@ -27,6 +22,9 @@ class Publisher(Base):
         self.phone = phone
 
     def to_dict(self):
+        """
+        :return: the class as a dictionary
+        """
         return {
             "code": self.code,
             "countryCode": self.countryCode,

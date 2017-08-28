@@ -1,24 +1,17 @@
 # Python class for entity Shop 
-# Created on 2017-08-18 ( Time 16:29:16 )
+# Created on 2017-08-25 ( Time 18:18:32 )
 
-from sqlalchemy import *
-from commons.get_connexion import Base
+from commons.get_connection import Base
 
 
 class Shop(Base):
     __tablename__ = 'Shop'
-    code = Column(String, primary_key=True, nullable=False, unique=True)
-    name = Column(String)
-    address1 = Column(String)
-    address2 = Column(String)
-    zipCode = Column(Integer)
-    city = Column(String)
-    countryCode = Column(String, ForeignKey('Country.code', ondelete='RESTRICT'), nullable=False)
-    phone = Column(String)
-    email = Column(String)
-    executive = Column(String, ForeignKey('Employee.code', ondelete='RESTRICT'))
+    __table_args__ = {'autoload': True}
 
     def __init__(self, code='null', name='null', address1='null', address2='null', zipCode='null', city='null', countryCode='null', phone='null', email='null', executive='null'):
+        """
+        Init the table
+        """
         self.code = code
         self.name = name
         self.address1 = address1
@@ -31,6 +24,9 @@ class Shop(Base):
         self.executive = executive
 
     def to_dict(self):
+        """
+        :return: the class as a dictionary
+        """
         return {
             "code": self.code,
             "name": self.name,
