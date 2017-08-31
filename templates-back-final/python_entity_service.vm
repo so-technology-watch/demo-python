@@ -1,17 +1,12 @@
-#set( $prefix = ${entity.name} + ".")
-#set( $suffix = " == '{}'")
-${SHARP} Python class for service of ${entity.name} 
-${SHARP} Created on $today.date ( Time $today.time )
+# Python class for service of ${entity.name} 
+# Created on 2017-08-29 ( Time 14:38:04 )
 
-import commons.generic_dao as dao_commons
-from entities.${entity.name} import ${entity.name}
-from sqlalchemy import text
-from services.commons import common_service
+from dao.${entity.name}_dao import ${entity.name}Dao
 
 
 class ${entity.name}Service:
     def __init__(self):
-        self.dao = dao_commons.GenericDao(${entity.name})
+        self.dao = ${entity.name}Dao()
 
     def find_by_id(self, $entity.keyAttributesNamesAsString(', ')):
         """
@@ -19,15 +14,14 @@ class ${entity.name}Service:
         :param $entity.keyAttributesNamesAsString(', '): PK of the entity to find
         :return: False if entity not found, entity if found
         """
-        request = build_query($entity.keyAttributesNamesAsString(', '))
-        return common_service.find_by_id(self.dao, request)
+        return self.dao.find_by_id($entity.keyAttributesNamesAsString(', '))
 
     def find_all(self):
         """
         Finds all entities.
         :return:  all entities
         """
-        return common_service.find_all(self.dao)
+        return self.dao.find_all()
 
     def insert(self, entity):
         """
@@ -35,8 +29,7 @@ class ${entity.name}Service:
         :param entity: to be inserted (supposed to have a valid Id/PK )
         :return: false if not found, entity if found
         """
-        request = build_query($entity.keyAttributesNamesAsString(', ', 'entity.', ''))
-        return common_service.insert(self.dao, request, entity)
+        return self.dao.insert(entity)
 
     def update(self, entity):
         """
@@ -44,8 +37,7 @@ class ${entity.name}Service:
         :param entity: to be updated (supposed to have a valid Id/PK )
         :return: true if entity updated, false if not found
         """
-        request = build_query($entity.keyAttributesNamesAsString(', ', 'entity.', ''))
-        return common_service.update(self.dao, request, entity)
+        return self.dao.update(entity)
 
     def save(self, entity):
         """
@@ -53,8 +45,7 @@ class ${entity.name}Service:
         :param entity: to be updated or created (supposed to have a valid Id/PK )
         :return: json with isNew attribute (True if created) and entity (created or updated)
         """
-        request = build_query($entity.keyAttributesNamesAsString(', ', 'entity.', ''))
-        return common_service.save(self.dao, request, entity)
+        return self.dao.save(entity)
 
     def delete_by_id(self, $entity.keyAttributesNamesAsString(', ')):
         """
@@ -62,8 +53,7 @@ class ${entity.name}Service:
         :param $entity.keyAttributesNamesAsString(', '): PK of the entity to delete
         :return: true if the entity has been deleted, false if not found and not deleted
         """
-        request = build_query($entity.keyAttributesNamesAsString(', '))
-        return common_service.delete_by_id(self.dao, request)
+        return self.dao.delete_by_id($entity.keyAttributesNamesAsString(', '))
 
     def delete(self, entity):
         """
@@ -71,8 +61,7 @@ class ${entity.name}Service:
         :param entity: to delete
         :return: 1 if the entity has been deleted, 0 if not found and not deleted
         """
-        request = build_query($entity.keyAttributesNamesAsString(', ', 'entity.', ''))
-        return common_service.delete(self.dao, request)
+        return self.dao.delete(entity)
 
     def exists_by_id(self, $entity.keyAttributesNamesAsString(', ')):
         """
@@ -80,24 +69,18 @@ class ${entity.name}Service:
         :param $entity.keyAttributesNamesAsString(', '): PK to check in database
         :return: true or false
         """
-        request = build_query($entity.keyAttributesNamesAsString(', '))
-        return common_service.exists_by_id(self.dao, request)
+        return self.dao.exists_by_id($entity.keyAttributesNamesAsString(', '))
 
     def exists(self, entity):
         """
         Ckeck if an entity is in the entity table
         :return: true or false
         """
-        request = build_query($entity.keyAttributesNamesAsString(', ', 'entity.', ''))
-        return common_service.exists(self.dao, request)
+        return self.dao.exists(entity)
 
     def count_all(self):
         """
         Counts all the entity present in the entity table
         :return: the number of rows in the entity table
         """
-        return common_service.count_all(self.dao)
-
-
-def build_query($entity.keyAttributesNamesAsString(', ')):
-    return text("${entity.keyAttributesNamesAsString(' and ', $prefix, $suffix)}".format(${entity.keyAttributesNamesAsString(', ')}))
+        return self.dao.count_all()

@@ -10,7 +10,7 @@ import datetime
 #foreach( $entity in $selectedEntities )
 #if( ! $entity.hasCompositePrimaryKey() )
 from entities.${entity.name} import ${entity.name}
-from services import ${entity.name}_service as commons_${entity.name.toLowerCase()}_service
+from dao.${entity.name}_dao import ${entity.name}Dao
 
 #end
 #end
@@ -21,7 +21,7 @@ from commons.UnitTest.${entity.name}_unit_test_ import TestDao${entity.name}
 
 #foreach( $entity in $selectedEntities )
 #if( ! $entity.hasCompositePrimaryKey() )
-${entity.name.toLowerCase()}_service = commons_${entity.name.toLowerCase()}_service.${entity.name}Service()
+${entity.name.toLowerCase()}_dao = ${entity.name}Dao()
 #end
 #end
 
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     init_${entity.name.toLowerCase()}.$attribute.name = "AAA"
 #end
 #elseif( $attribute.isTemporalType())
-    init_${entity.name.toLowerCase()}.$attribute.name = datetime.datetime.strptime("1011-11-11 00:00:00", "%Y-%m-%d %H:%M:%S")
+    init_${entity.name.toLowerCase()}.$attribute.name = datetime.date(1011, 11, 11)
 #elseif( $attribute.isNumberType() )
     init_${entity.name.toLowerCase()}.$attribute.name = 111111111
 #else
@@ -73,16 +73,16 @@ if __name__ == '__main__':
 #end
 #end
 #foreach( $test in $list1 )
-    ${fn.toLowerCase($test)}_service.insert(init_${fn.toLowerCase($test)})
+    ${fn.toLowerCase($test)}_dao.insert(init_${fn.toLowerCase($test)})
 #end
 #foreach( $test in $list2 )
-    ${fn.toLowerCase($test)}_service.insert(init_${fn.toLowerCase($test)})
+    ${fn.toLowerCase($test)}_dao.insert(init_${fn.toLowerCase($test)})
 #end
 #foreach( $test in $list3 )
-    ${fn.toLowerCase($test)}_service.insert(init_${fn.toLowerCase($test)})
+    ${fn.toLowerCase($test)}_dao.insert(init_${fn.toLowerCase($test)})
 #end
 #foreach( $test in $list4 )
-    ${fn.toLowerCase($test)}_service.insert(init_${fn.toLowerCase($test)})
+    ${fn.toLowerCase($test)}_dao.insert(init_${fn.toLowerCase($test)})
 #end
 
     unittest.main()

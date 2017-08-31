@@ -1,0 +1,155 @@
+${SHARP} Python class for Generic Dao
+${SHARP} Created on $today.date ( Time $today.time )
+
+from commons.data_provider import data_provider
+
+
+def find_all(entity_class):
+    """
+    Select all entities from the database
+    :param: 
+    :return: all the entities's objects if found, an error message if problems with the database
+    """
+    session = None
+    try:
+        session = data_provider.new_session()
+        return session.query(entity_class).all()
+    except Exception as e:
+        print(e)
+        if session:
+            session.rollback()
+        raise e
+    finally:
+        if session:
+            session.close()
+
+
+def find(entity_class, query):
+    """
+    Select an entity by her primary key in the database
+    :param entity_class: class of the entity
+    :param query: conditions of the request (the PK)
+    :return: the entity if found, an error message if problems with the database
+    """
+    session = None
+    try:
+        session = data_provider.new_session()
+        entity = session.query(entity_class).filter(query).first()
+        return entity
+    except Exception as e:
+        print(e)
+        if session:
+            session.rollback()
+        raise e
+    finally:
+        if session:
+            session.close()
+
+
+def insert(entity):
+    """
+    Create the given entity in the database
+    :param entity: to be created (supposed to have a valid Id/PK )
+    :return: entity if created, an error message if problems with the database
+    """
+    session = None
+    try:
+        session = data_provider.new_session()
+        session.add(entity)
+        session.commit()
+        return entity
+    except Exception as e:
+        print(e)
+        if session:
+            session.rollback()
+        raise e
+    finally:
+        if session:
+            session.close()
+
+
+def update(entity_class, entity, query):
+    """
+    Update the given entity in the database 
+    :param entity: to be updated (supposed to have a valid Id/PK )
+    :param query: conditions of the request (the PK)
+    :return: 1 if the entity has been updated, 0 if not, an error message if problems with the database
+    """
+    session = None
+    try:
+        session = data_provider.new_session()
+        result = session.query(entity_class).filter(query).update(entity.to_dict(), synchronize_session='fetch')
+        session.commit()
+        return result
+    except Exception as e:
+        print(e)
+        if session:
+            session.rollback()
+        raise e
+    finally:
+        if session:
+            session.close()
+
+
+def delete(entity_class, query):
+    """
+    Delete an entity in the database
+    :param query: conditions of the request (the PK)
+    :return: 1 if the entity has been deleted, 0 if not, an error message if problems with the database
+    """
+    session = None
+    try:
+        session = data_provider.new_session()
+        result = session.query(entity_class).filter(query).delete(synchronize_session='fetch')
+        session.commit()
+        return result
+    except Exception as e:
+        print(e)
+        if session:
+            session.rollback()
+        raise e
+    finally:
+        if session:
+            session.close()
+
+
+def count_all(entity_class):
+    """
+    Count all entities in the database
+    :param:
+    :return: number of entities (integer), an error message if problems with the database
+    """
+    session = None
+    try:
+        session = data_provider.new_session()
+        result = session.query(entity_class).count()
+        return result
+    except Exception as e:
+        print(e)
+        if session:
+            session.rollback()
+        raise e
+    finally:
+        if session:
+            session.close()
+
+
+def exists(entity_class, query):
+    """
+    Check if an entity exists in the databas
+    :param query: conditions of the request (the PK)
+    :return: true if the entity exists, false if not, an error message if problems with the database
+    """
+    session = None
+    try:
+        session = data_provider.new_session()
+        q = session.query(entity_class).filter(query)
+        return session.query(q.exists()).scalar()
+    except Exception as e:
+        print(e)
+        if session:
+            session.rollback()
+        raise e
+    finally:
+        if session:
+            session.close()

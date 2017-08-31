@@ -16,7 +16,7 @@ def get_all():
     try:
         entities = ${entity.name.toLowerCase()}_service.find_all()
         return common_resource.get_all(json_serializer, entities)
-    except TypeError as e:
+    except Exception as e:
         return common_resource.error_500(e)
  
 
@@ -24,8 +24,8 @@ def get_all():
 def get_by_id($entity.keyAttributesNamesAsString(', ')):
     try:
         result = ${entity.name.toLowerCase()}_service.find_by_id($entity.keyAttributesNamesAsString(', '))      
-        return common_resource.get_by_id(result, ${entity.name}, json_serializer)
-    except TypeError as e:
+        return common_resource.get_by_id(result, json_serializer)
+    except Exception as e:
         return common_resource.error_500(e)
 
 
@@ -34,8 +34,8 @@ def create():
     try:
         entity = common_resource.body_from_json(json_serializer)
         result = ${entity.name.toLowerCase()}_service.insert(entity)
-        return common_resource.create(result, json_serializer, ${entity.name})
-    except TypeError as e:
+        return common_resource.create(result, json_serializer)
+    except Exception as e:
         return common_resource.error_500(e)
 
 
@@ -48,7 +48,7 @@ def update($entity.keyAttributesNamesAsString(', ')):
 #end
         result = ${entity.name.toLowerCase()}_service.update(entity)
         return common_resource.update(result)
-    except TypeError as e:
+    except Exception as e:
         return common_resource.error_500(e)
 
 
@@ -57,8 +57,8 @@ def save():
     try:
         entity = common_resource.body_from_json(json_serializer)
         result = ${entity.name.toLowerCase()}_service.save(entity)
-        return common_resource.save(result, ${entity.name}, json_serializer, entity)
-    except TypeError as e:
+        return common_resource.save(result, json_serializer, entity)
+    except Exception as e:
         return common_resource.error_500(e)
 
 
@@ -67,7 +67,7 @@ def delete($entity.keyAttributesNamesAsString(', ')):
     try:
         result = ${entity.name.toLowerCase()}_service.delete_by_id($entity.keyAttributesNamesAsString(', '))
         return common_resource.delete(result)
-    except TypeError as e:
+    except Exception as e:
         return common_resource.error_500(e)
 
 
@@ -76,6 +76,6 @@ def count():
     try:
         result = ${entity.name.toLowerCase()}_service.count_all()
         return common_resource.count(result)
-    except TypeError as e:
+    except Exception as e:
         print(e)
         response.status = 400

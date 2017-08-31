@@ -17,8 +17,8 @@ import unittest
 import datetime
 
 from entities.$entity.name import $entity.name
-from services import ${entity.name}_service as commons_${entity.name.toLowerCase()}_service
-${entity.name.toLowerCase()}_service = commons_${entity.name.toLowerCase()}_service.${entity.name}Service()
+from dao.${entity.name}_dao import ${entity.name}Dao
+${entity.name.toLowerCase()}_dao = ${entity.name}Dao()
 
 #if( ! $entity.hasCompositePrimaryKey() )
 #foreach( $field in $entity.keyAttributes)
@@ -65,7 +65,7 @@ class TestDao${entity.name}(unittest.TestCase):
 #elseif( $field.isNumberType())
         entity.$field.name = 1
 #elseif( $field.isTemporalType())
-        entity.$field.name = datetime.datetime.strptime("1011-11-11 00:00:00", "%Y-%m-%d %H:%M:%S")
+        entity.$field.name = datetime.date(1011, 11, 11)
 #else
         entity.$field.name = "test_value"
 #end
@@ -73,27 +73,27 @@ class TestDao${entity.name}(unittest.TestCase):
 
         ${SHARP} --- DELETE
         print("Delete : {}".format(entity.to_dict()))
-        ${entity.name.toLowerCase()}_service.delete(entity)
-        cpt_initial = ${entity.name.toLowerCase()}_service.count_all()
+        ${entity.name.toLowerCase()}_dao.delete(entity)
+        cpt_initial = ${entity.name.toLowerCase()}_dao.count_all()
         print("Initial count = {}".format(cpt_initial))
 
         ${SHARP} --- CREATE
         print("Create : {}".format(entity))
-        ${entity.name.toLowerCase()}_service.insert(entity)
-        self.assertTrue(${entity.name.toLowerCase()}_service.exists_by_id($condition))
-        self.assertTrue(${entity.name.toLowerCase()}_service.exists(entity))
+        ${entity.name.toLowerCase()}_dao.insert(entity)
+        self.assertTrue(${entity.name.toLowerCase()}_dao.exists_by_id($condition))
+        self.assertTrue(${entity.name.toLowerCase()}_dao.exists(entity))
 
-        cpt = ${entity.name.toLowerCase()}_service.count_all()
+        cpt = ${entity.name.toLowerCase()}_dao.count_all()
         self.assertEqual(cpt, cpt_initial + 1)
         print("Count = {}".format(cpt))
 
         ${SHARP} --- FIND
         print("Find by id ...")
-        element = ${entity.name.toLowerCase()}_service.find_by_id($condition)
+        element = ${entity.name.toLowerCase()}_dao.find_by_id($condition)
         self.assertIsNotNone(element)
         self.assertEqual(type(element), type(entity))
         self.assertEqual(element.to_dict(), entity.to_dict())
-        self.assertTrue(${entity.name.toLowerCase()}_service.exists(entity))
+        self.assertTrue(${entity.name.toLowerCase()}_dao.exists(entity))
         print("Found : {}".format(element))
 
         ${SHARP} --- UPDATE
@@ -103,37 +103,36 @@ class TestDao${entity.name}(unittest.TestCase):
 #if( $field.isNumberType() )
         entity.$field.name = 2
 #elseif( $field.isTemporalType())
-        entity.$field.name = datetime.datetime.strptime("2022-02-22 00:00:00", "%Y-%m-%d %H:%M:%S")
+        entity.$field.name = datetime.date(2022, 2, 22)
 #else
         entity.$field.name = "test_changement"
 #end
 #end
 #end
-        element = ${entity.name.toLowerCase()}_service.update(entity)
+        element = ${entity.name.toLowerCase()}_dao.update(entity)
         print("Update : {}".format(entity))
         self.assertEqual(element, 1)
 
         ${SHARP} --- RELOAD AFTER UPDATE
         print("Find by id ...")
-        element = ${entity.name.toLowerCase()}_service.find_by_id($condition)
+        element = ${entity.name.toLowerCase()}_dao.find_by_id($condition)
         self.assertIsNotNone(element)
         self.assertEqual(type(element), type(entity))
         self.assertEqual(element.to_dict(), entity.to_dict())
         print("Found : {}".format(element))
 
         ${SHARP} --- DELETE
-        element = ${entity.name.toLowerCase()}_service.delete_by_id($condition)
+        element = ${entity.name.toLowerCase()}_dao.delete_by_id($condition)
         self.assertEqual(element, 1)
-        self.assertEqual(${entity.name.toLowerCase()}_service.delete_by_id($condition), False)
-        self.assertEqual(${entity.name.toLowerCase()}_service.delete(entity), 0)
+        self.assertEqual(${entity.name.toLowerCase()}_dao.delete_by_id($condition), False)
+        self.assertEqual(${entity.name.toLowerCase()}_dao.delete(entity), 0)
 
-        cpt_final = ${entity.name.toLowerCase()}_service.count_all()
+        cpt_final = ${entity.name.toLowerCase()}_dao.count_all()
         self.assertEqual(cpt_final, cpt_initial)
         print("Final count = {}".format(cpt))
 
-        self.assertFalse(${entity.name.toLowerCase()}_service.exists_by_id($condition))
-        self.assertFalse(${entity.name.toLowerCase()}_service.exists(entity))
-        self.assertEqual(${entity.name.toLowerCase()}_service.find_by_id($condition), False)
+        self.assertFalse(${entity.name.toLowerCase()}_dao.exists_by_id($condition))
+        self.assertFalse(${entity.name.toLowerCase()}_dao.exists(entity))
+        self.assertEqual(${entity.name.toLowerCase()}_dao.find_by_id($condition), None)
 
         print("Normal end of persistence service test.")
-

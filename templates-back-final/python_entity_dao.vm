@@ -1,0 +1,76 @@
+#set( $prefix = ${entity.name} + ".")
+#set( $suffix = " == '{}'")
+${SHARP} Python class for service of ${entity.name} 
+${SHARP} Created on $today.date ( Time $today.time )
+
+from entities.${entity.name} import ${entity.name}
+from dao.commons import common_dao
+from sqlalchemy import text
+
+
+class ${entity.name}Dao(object):
+    def __init__(self):
+        self.entity_class = ${entity.name}
+
+    def find_all(self):
+        return common_dao.find_all(self.entity_class)
+
+    def find_by_id(self, $entity.keyAttributesNamesAsString(', ')):
+        query = build_query($entity.keyAttributesNamesAsString(', '))
+        return common_dao.find(self.entity_class, query)
+
+    def insert(self, entity):
+        query = build_query($entity.keyAttributesNamesAsString(", ", "entity.", ""))
+        if common_dao.exists(self.entity_class, query):
+            return False
+        else:
+            return common_dao.insert(entity)
+
+    def update(self, entity):
+        query = build_query($entity.keyAttributesNamesAsString(", ", "entity.", ""))
+        if common_dao.exists(self.entity_class, query):
+            return common_dao.update(self.entity_class, entity, query)
+        else:
+            return False
+
+    def save(self, entity):
+        query = build_query($entity.keyAttributesNamesAsString(", ", "entity.", ""))
+        if common_dao.exists(self.entity_class, query):
+            return {
+                'entity': common_dao.update(self.entity_class, entity, query),
+                'isNew': False
+            }
+        else:
+            return {
+                'entity': common_dao.insert(entity),
+                'isNew': True
+            }
+
+    def delete_by_id(self, $entity.keyAttributesNamesAsString(', ')):
+        query = build_query($entity.keyAttributesNamesAsString(', '))
+        if common_dao.exists(self.entity_class, query):
+            return common_dao.delete(self.entity_class, query)
+        else:
+            return False
+
+    def delete(self, entity):
+        query = build_query($entity.keyAttributesNamesAsString(", ", "entity.", ""))
+        if common_dao.exists(self.entity_class, query):
+            return common_dao.delete(self.entity_class, query)
+        else:
+            return False
+
+    def exists_by_id(self, $entity.keyAttributesNamesAsString(', ')):
+        query = build_query($entity.keyAttributesNamesAsString(', '))
+        return common_dao.exists(self.entity_class, query)
+
+    def exists(self, entity):
+        query = build_query($entity.keyAttributesNamesAsString(", ", "entity.", ""))
+        return common_dao.exists(self.entity_class, query)
+
+    def count_all(self):
+        return common_dao.count_all(self.entity_class)
+
+
+def build_query($entity.keyAttributesNamesAsString(', ')):
+    return text("${entity.keyAttributesNamesAsString(' and ', $prefix, $suffix)}".format(${entity.keyAttributesNamesAsString(', ')}))

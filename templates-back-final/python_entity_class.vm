@@ -1,7 +1,7 @@
 ${SHARP} Python class for entity ${entity.name} 
 ${SHARP} Created on $today.date ( Time $today.time )
 
-from commons.get_connection import Base
+from commons.data_provider import Base
 
 
 class ${entity.name}(Base):
